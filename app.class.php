@@ -11,8 +11,8 @@ session_start();
 use PFBC\Form;
 use PFBC\Element;
 
-include("pfbc/PFBC/Form.php");
-include("forms/blueticket_forms.php");
+require_once("pfbc/PFBC/Form.php");
+require_once("forms/blueticket_forms.php");
 
 class blueticket_app {
 
