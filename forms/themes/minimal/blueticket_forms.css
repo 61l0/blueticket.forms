@@ -1,0 +1,211 @@
+@import 'fonts.css';
+
+/* main blueticket_forms container */
+.blueticket_forms{
+    margin-bottom: 20px;
+    font-family: Helvetica, Tahoma, sans-serif;
+    font-size: 12px;
+    line-height: 20px;
+    color: #666699;
+    position: relative;
+}
+.blueticket_forms-list-container{
+    overflow: auto;
+}
+/* grid table */
+.blueticket_forms-list{
+    min-width: 100%;
+    width: auto;
+    display: table !important;
+    margin: 0 0 3px;
+    border-spacing: 0;
+}
+
+/* grid column header */
+.blueticket_forms-list th{
+    border-bottom: 2px solid #6678B1;
+    color: #003399;
+    font-size: 14px;
+    font-weight: normal;
+    padding: 10px 8px;
+    text-align: left;
+    white-space: nowrap;
+}
+
+/* grid column with action */ 
+.blueticket_forms-list th.blueticket_forms-action:hover{
+    cursor: pointer;
+    color: #000099;
+}
+
+/* grid cell */
+.blueticket_forms-list td{
+    border-bottom: 1px solid #ccc;
+    color: #666699;
+    padding: 6px 8px;
+    vertical-align: top;
+}
+
+/* row hover */
+.blueticket_forms-list tr:hover > td{
+    color: #000099;
+}
+ /* grid buttons column */
+.blueticket_forms-actions{
+    text-align: right;
+}
+
+/* h2 table header */
+.blueticket_forms h2,.blueticket_forms-main-tab{
+    font-size: 18px;
+    line-height: 27px;
+    font-weight: normal;
+    margin: 5px 0 0;
+    padding: 5px;
+    border-bottom: 1px solid #ccc;
+    color: #666699;
+}
+
+/* toggle button */
+.blueticket_forms-toggle-show{
+    font-size: 12px;
+    margin-top: 5px;
+    float: right;
+    cursor: pointer;
+    color: #666699;
+}
+.blueticket_forms-toggle-show:hover{
+    color: #000099;
+}
+/* minimized tab */
+.blueticket_forms-main-tab{
+    background: #fafafa;
+}
+
+/* buttons */
+.blueticket_forms-button{
+    font-size: 14px;
+    margin: 0 5px;
+    color: #666699;
+}
+a.blueticket_forms-button{
+    text-decoration: underline;
+}
+.blueticket_forms-button > i{
+    font-size: 12px;
+    margin-right: 3px;
+    text-decoration: none;
+}
+.blueticket_forms-actions .blueticket_forms-button{
+    text-decoration: none;
+}
+.blueticket_forms-button:hover{
+    color: #000099;
+}
+
+/* inputs */
+.blueticket_forms input[type="text"],.blueticket_forms select{
+    margin-right: 3px;
+}
+.blueticket_forms-input-small{
+    width: 70px;
+}
+ /* pagination */
+.blueticket_forms-pagination{
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: inline;
+    font-size: 14px;
+}
+.blueticket_forms-pagination li{
+    list-style: none;
+    display: inline;
+    margin: 0 5px;
+}
+.blueticket_forms-pagination li a{
+    color: #666699;
+}
+.blueticket_forms-pagination li a:hover{
+    color: #000099;
+}
+/* benchmark */
+.blueticket_forms-benchmark{
+    display: block;
+    text-align: right;
+}
+.blueticket_forms-benchmark span{
+    font-size: 10px;
+    margin: 0 5px;
+    color: #bbb;
+    line-height: 1.1;
+}
+
+/* details image */
+.blueticket_forms-upload-container img{
+    display: block;
+}
+ /* upload file name */
+.blueticket_forms-file-name > a{
+    font-size: 14px;
+    margin-right: 5px;
+}
+ /* tooltips */
+.blueticket_forms-tooltip{
+    text-decoration: none;
+    font-size: 80%;
+    color: #AD2424;
+}
+
+
+/* messages */
+.blueticket_forms-message{
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    font-size: 15px;
+    padding: 10px 20px;
+    box-shadow: inset 0 -1px 0 rgba(0,0,0,0.05),inset 0 1px 0 rgba(0,0,0,0.05);
+    display: none;
+    text-shadow: 0 1px 0 rgba(0,0,0,0.4);
+    color: #fff;
+    color: rgba(255,255,255,0.90);
+    cursor: pointer;
+    z-index: 500;
+}
+.blueticket_forms-message.success{
+    background: #5AB95F;
+    border-top: 1px solid #8A1414;
+    border-bottom: 1px solid #8A1414;
+}
+.blueticket_forms-message.error{
+    background: #D05C5C;
+    border-top: 1px solid #931C1C;
+    border-bottom: 1px solid #931C1C;
+}
+.blueticket_forms-message.info{
+    background: #6CC3C6;
+    border-top: 1px solid #127B7C;
+    border-bottom: 1px solid #127B7C;
+}
+.blueticket_forms-message.note{
+    background: #DDB75D;
+    border-top: 1px solid #A66E13;
+    border-bottom: 1px solid #A66E13;
+}
+
+/* RTL */
+.blueticket_forms.blueticket_forms_rtl{
+    direction: rtl;
+}
+.blueticket_forms.blueticket_forms_rtl .blueticket_forms-toggle-show{
+    float: left;
+}
+.blueticket_forms.blueticket_forms_rtl .blueticket_forms-button > i{
+    margin-right: auto;
+    margin-left: 4px;
+}
+.blueticket_forms.blueticket_forms_rtl .blueticket_forms-details-table td:first-child {
+    text-align: left;
+}

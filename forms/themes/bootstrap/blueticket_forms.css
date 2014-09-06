@@ -1,0 +1,308 @@
+.blueticket_forms{
+    margin-bottom: 20px;
+}
+.blueticket_forms-list{
+    min-width: 100%;
+    width: auto;
+    display: table !important;
+    margin-bottom: 3px;
+ /*   table-layout: fixed;*/
+}
+.blueticket_forms-list th, .blueticket_forms-list td{
+    /*white-space:nowrap;*/
+}
+.blueticket_forms-column:hover{
+    text-decoration: underline;
+    cursor: pointer;
+}
+.blueticket_forms-header{
+    border-bottom: 1px solid #E5E5E5;
+}
+.blueticket_forms-top-actions{
+    padding: 5px 0;
+}
+.blueticket_forms-container{
+    position: relative;
+}
+.blueticket_forms-list-container{
+    overflow-x: auto;
+    clear: both;
+}
+
+.blueticket_forms-nav{
+    padding: 15px 10px 5px;
+}
+.blueticket_forms-nav > *{
+    vertical-align: top;
+    margin-top: 0;
+    margin-bottom: 0;
+}
+td.blueticket_forms-actions{
+    text-align: right;
+    white-space:nowrap;
+}
+.blueticket_forms-actions a{
+    vertical-align: top;
+}
+.blueticket_forms .blueticket_forms-list .blueticket_forms-row:hover td.blueticket_forms-actions-fixed{
+    position: absolute;
+    right: 0;
+    border-left: none;
+    margin-top: -1px;
+}
+
+.blueticket_forms-overlay{
+    /*display: none;*/
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    background: #fff 50% 50% no-repeat url(loading.gif);
+    opacity: 0.5;
+    width: 100%;
+}
+.blueticket_forms-num{
+    color: #bbb;
+    width: 10px;
+}
+.blueticket_forms-benchmark{
+    margin: 5px;
+    font-size: 10px;
+    line-height: 1.2;
+    float: right;
+    color: #999;
+}
+.blueticket_forms-benchmark span {
+    margin: 0 5px;
+}
+table.blueticket_forms-details.table td input,table.blueticket_forms-details.table td select,table.blueticket_forms-details.table td textarea{
+    margin-bottom: 0;
+}
+.blueticket_forms .tab-content{
+    padding: 8px;
+    border: 1px solid #DDDDDD;
+    border-top: 0;
+}
+/*.blueticket_forms .blueticket_forms-remove-file{
+    vertical-align: bottom;
+    margin-left: 5px;
+}*/
+.blueticket_forms .blueticket_forms-file-container.error{
+    border: 1px solid #E20101;
+    background-color: #FFE4E4;
+    padding-left: 5px;
+}
+.blueticket_forms .blueticket_forms-file-container{
+    font-size: 14px;
+    line-height: 30px;
+}
+.blueticket_forms .blueticket_forms-file-container img{
+    max-width: 99%;
+    vertical-align: bottom;
+}
+.blueticket_forms-add-file{
+    /*margin-top: 5px;*/
+    position: relative;
+    overflow: hidden;
+}
+input.blueticket_forms-upload{
+    cursor: pointer;
+    direction: ltr;
+    font-size: 100%;
+    margin: 0;
+    opacity: 0;
+    position: absolute;
+    right: 0;
+    top: 0;
+    transform: translate(-300px, 0px) scale(4);
+    -webkit-transform: translate(-300px, 0px) scale(4);
+    filter:progid:DXImageTransform.Microsoft.Alpha(opacity=0);
+}
+
+.blueticket_forms .blueticket_forms-list td.blueticket_forms-sum{
+    font-weight: bold;
+}
+
+/* column styles */
+.blueticket_forms-list td.align-left{
+    text-align: left
+}
+.blueticket_forms-list td.align-right{
+    text-align: right;
+}
+.blueticket_forms-list td.align-center{
+    text-align: center;
+}
+.blueticket_forms-list td.font-bold{
+    font-weight: bold;
+}
+.blueticket_forms-list td.font-italic{
+    font-style: italic;
+}
+.blueticket_forms-list td.text-underline{
+    text-decoration: underline;
+}
+.blueticket_forms .blueticket_forms-list td .btn{
+    margin-top: -4px;
+    margin-bottom: -4px;
+}
+
+.blueticket_forms-th th{
+    background: #efefef;  
+    white-space: nowrap;
+}
+
+.blueticket_forms .blueticket_forms-daterange{
+    width: 80px;
+}
+.blueticket_forms-googlemap img{
+    max-width: inherit;
+}
+.blueticket_forms-search input,.blueticket_forms-search select{
+    width: 10%;
+    margin: 0 5px 0 0;
+    vertical-align: top;
+}
+
+.blueticket_forms .btn-group{
+    white-space: nowrap;
+}
+.blueticket_forms .btn-group .btn{
+    float: none !important;
+}
+.blueticket_forms-upload-container img{
+    display: block;
+    max-width: 700px;
+    clear: both;
+    margin-bottom: 5px;
+}
+
+ul.blueticket_forms-map-dropdown{
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    background: #fff;
+    border-radius: 2px;
+    box-shadow: 1px 2px 2px rgba(0,0,0,0.3);
+    position: absolute;
+    z-index: 5;
+}
+ul.blueticket_forms-map-dropdown li{
+    margin: 0;
+    padding: 3px 10px;
+    cursor: pointer;
+}
+ul.blueticket_forms-map-dropdown li:hover{
+    background: #f4f4f4;
+}
+input.blueticket_forms-inline{
+    display: inline-block;
+    width: 40%;
+    margin-right: 10px;
+}
+.blueticket_forms-map{
+    border: 1px solid #CCCCCC;
+    border-radius: 4px;
+    box-shadow: 0 1px 1px rgba(0, 0, 0, 0.075) inset;
+    margin: 10px 0;
+}
+/*.blueticket_forms-radio-label,.blueticket_forms-checkboxes-label{
+    display: block;
+}
+.blueticket_forms-radio-label input,.blueticket_forms-checkboxes-label input{
+    margin-right: 7px;
+}*/
+
+.blueticket_forms .validation-error{
+    box-shadow: 0 0 1px red, 0 0 3px red !important;
+    background: #FFEBEB !important;
+}
+th.blueticket_forms-actions{
+    width: 40px;
+}
+a.blueticket_forms_modal{
+    text-decoration: none;
+    color: inherit;
+}
+
+/*.blueticket_forms-view table tr td:first-child{
+    width: 30%;
+}*/
+/*td.details-label{
+    width: 30%;
+}*/
+
+
+/* messages */
+.blueticket_forms-message{
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    font-size: 15px;
+    padding: 10px 20px;
+    box-shadow: inset 0 -1px 0 rgba(0,0,0,0.05),inset 0 1px 0 rgba(0,0,0,0.05);
+    display: none;
+    text-shadow: 0 1px 0 rgba(0,0,0,0.4);
+    color: #fff;
+    color: rgba(255,255,255,0.90);
+    cursor: pointer;
+    z-index: 500;
+}
+.blueticket_forms-message.success{
+    background: #5AB95F;
+    border-top: 1px solid #8A1414;
+    border-bottom: 1px solid #8A1414;
+}
+.blueticket_forms-message.error{
+    background: #D05C5C;
+    border-top: 1px solid #931C1C;
+    border-bottom: 1px solid #931C1C;
+}
+.blueticket_forms-message.info{
+    background: #6CC3C6;
+    border-top: 1px solid #127B7C;
+    border-bottom: 1px solid #127B7C;
+}
+.blueticket_forms-message.note{
+    background: #DDB75D;
+    border-top: 1px solid #A66E13;
+    border-bottom: 1px solid #A66E13;
+}
+.blueticket_forms-toggle-show{
+    float: right;
+    font-size: 13px;
+    font-weight: bold;
+    line-height: inherit;
+    margin: 8px;
+    cursor: pointer;
+}
+h2{
+    border-bottom: 1px solid #ddd;
+}
+.blueticket_forms-main-tab{
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    padding: 8px 15px 6px;
+    margin: 0 2px;
+    font-size: 20px;
+}
+
+/* RTL */
+.blueticket_forms.blueticket_forms_rtl{
+    direction: rtl;
+}
+.blueticket_forms.blueticket_forms_rtl .blueticket_forms-list .blueticket_forms-row:hover td.blueticket_forms-actions-fixed{
+    right: auto;
+    left: 1px;
+}
+.blueticket_forms.blueticket_forms_rtl .blueticket_forms-toggle-show{
+    float: left;
+}
+.blueticket_forms.blueticket_forms_rtl .blueticket_forms-button > i{
+    margin-right: auto;
+    margin-left: 4px;
+}
+.blueticket_forms.blueticket_forms_rtl .blueticket_forms-details-table td:first-child {
+    text-align: left;
+}
