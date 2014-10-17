@@ -1,4 +1,9 @@
 <?php
+function before_details_callback($row_data, $primary) {
+    $row_data['items.RegistrationNumber'] = '22';
+    print_r($row_data);
+}
+
 function publish_action($blueticket_forms)
 {
     if ($blueticket_forms->get('primary'))
