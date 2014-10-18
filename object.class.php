@@ -33,6 +33,7 @@ class blueticket_objects {
         $blueticket->table_name($this->getTranslatedText('Items')); //titulok zobrazenia tabulky na stranke
 
         $blueticket->columns('PLU,RegistrationNumber,Name,Qty,UnitID,Price,MinimalPrice,PurchasePrice,TaxID,GroupID,Barcode,SubtotalPrice,SubtotalPurchasePrice'); //nastavenie stlpcov tabulky, ktore sa zobrazia v tabulkovom zobrazeni
+        $blueticket->fields('PLU,Name,Qty,UnitID,Price,MinimalPrice,PurchasePrice,TaxID,GroupID,Barcode'); //nastavenie stlpcov tabulky, ktore sa zobrazia v tabulkovom zobrazeni
         $blueticket->relation('UnitID', 'units', 'ID', 'Name');
         $blueticket->relation('TaxID', 'taxes', 'ID', 'Value');
         $blueticket->relation('GroupID', 'groups', 'ID', 'Name');
