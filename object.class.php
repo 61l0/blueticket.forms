@@ -18,8 +18,32 @@ class blueticket_objects {
         
     }
 
-    function getTranslatedText($par_Text) {
+    function getTranslatedText($par_Text, $par_lang = 'en') {
+        $blueticket_db = blueticket_forms_db::get_instance();
+
+        $blueticket_db->query("SELECT TranslatedText FROM translate WHERE TextToTranslate='$par_Text' AND Lang='$par_lang'");
+        $myrow = $blueticket_db->row();
+
+        if (!$myrow) {
+            $blueticket_db->query("INSERT INTO translate(TextToTranslate,TranslatedText,Lang) VALUES('$par_Text','$par_Text','$par_lang')");
+            $par_Text = $par_Text;
+        } else {
+            $par_Text = $myrow['TranslatedText'];
+        }
         return $par_Text;
+    }
+
+    function generateMenu() {
+        $return = '<div style="width:100%; height:50px;padding-left:5px">';
+
+        $return .= '<a href="?report=cards" class="btn btn-primary" style="width:150px; height:30px; margin-top:5px; margin-right:5px">Cenníky</a>';
+        $return .= '<a href="?report=stats" class="btn btn-primary" style="width:150px; height:30px; margin-top:5px; margin-right:5px">Štatistika</a>';
+
+        $return .= '</div>';
+
+        $return .= '<div style="clear:both"></div>';
+
+        return $return;
     }
 
     function generateItems() {
@@ -64,23 +88,22 @@ class blueticket_objects {
         $blueticket->highlight_row('PurchasePrice', '>', '{Price}', 'Orange');
 
         $blueticket->sum('SubtotalPrice, SubtotalPurchasePrice'); //  Zosumarizuje zvolene stlpce - berie do uvahy vsetky riadky filtrovanej tabulky
-
         //$bt_item_invoice_month = new blueticket_forms();
 
         $blueticket->default_tab($this->getTranslatedText('Items'));
-        
+
         $blueticket->column_class('Qty,Price,MinimalPrice,PurchasePrice,SubtotalPrice,SubtotalPurchasePrice', 'align-right');
         $blueticket->change_type('Price,MinimalPrice,PurchasePrice,SubtotalPrice,SubtotalPurchasePrice', 'price', '0', array('suffix' => ' €'));
         $blueticket->before_insert('before_items_insert_callback', 'blueticket.pos.functions.php');
 
         // invoices items month nested table
-        $bt_item_invoice = $blueticket->nested_table('InvoicesItems', 'RegistrationNumber', 'invoices_items', 'Barcode');
+        $bt_item_invoice = $blueticket->nested_table($this->getTranslatedText('InvoicesItems'), 'RegistrationNumber', 'invoices_items', 'Barcode');
         $bt_item_invoice->columns('InvoiceDateTime, InvoiceNumber, Barcode, Name, CartNr');
         $bt_item_invoice->subselect('InvoiceDateTime', 'SELECT MAX(InvoiceDateTime) as InvoiceDateTime FROM invoices WHERE InvoiceNumber={InvoiceNumber}');
         $bt_item_invoice->order_by('InvoiceDateTime', 'DESC');
 
         // invoices items month nested table
-        $bt_item_invoice_month = $blueticket->nested_table('InvoicesItemsMonth', 'RegistrationNumber', 'invoices_items_month', 'Barcode');
+        $bt_item_invoice_month = $blueticket->nested_table($this->getTranslatedText('InvoicesItemsMonth'), 'RegistrationNumber', 'invoices_items_month', 'Barcode');
         $bt_item_invoice_month->columns('InvoiceDateTime, InvoiceNumber, Barcode, Name, CartNr');
         $bt_item_invoice_month->subselect('InvoiceDateTime', 'SELECT MAX(InvoiceDateTime) as InvoiceDateTime FROM invoices WHERE InvoiceNumber={InvoiceNumber}');
         $bt_item_invoice_month->order_by('InvoiceDateTime', 'DESC');
