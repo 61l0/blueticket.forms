@@ -22,12 +22,14 @@ require_once ('object.class.php');
                         echo $bt->generateItems();
                         break;
                     case 'stats':
+                        echo $bt->generateInvoices();
+                        break;
+                    case 'trans':
+                        echo $bt->generateTranslate();
                         break;
                 }
             } else {
-                ?>
-
-                <?php
+                echo $bt->generateItems();
             }
             ?>
         </div>
