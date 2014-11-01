@@ -13,5 +13,10 @@ function before_items_insert_callback($row_data, $primary) {
     $blueticket_db->query('SELECT MAX(RegistrationNumber)+1 as RegNum FROM items');
     $myrow = $blueticket_db->row();
 
+    if($myrow['RegNum']<100000)
+    {
+        $myrow['RegNum'] = 100001;
+    }
+    
     $row_data->set('items.RegistrationNumber', $myrow['RegNum']);
 }
