@@ -12,6 +12,8 @@ use PFBC\Element;
 require_once("pfbc/PFBC/Form.php");
 require_once("forms/blueticket_forms.php");
 
+require_once ('tcpdf/tcpdf_barcodes_2d.php');
+
 class blueticket_objects {
 
     public $lang = 'sk';
@@ -62,8 +64,8 @@ class blueticket_objects {
         $blueticket->order_by('Name', 'ASC');
         $blueticket->table_name($this->getTranslatedText('Items')); //titulok zobrazenia tabulky na stranke
 
-        $blueticket->columns('PLU,RegistrationNumber,Name,Qty,UnitID,Price,MinimalPrice,PurchasePrice,TaxID,GroupID,Barcode,SubtotalPrice,SubtotalPurchasePrice,SellToday,SellHistory'); //nastavenie stlpcov tabulky, ktore sa zobrazia v tabulkovom zobrazeni
-        $blueticket->fields('PLU,Name,Qty,UnitID,Price,MinimalPrice,PurchasePrice,TaxID,GroupID,Barcode'); //nastavenie stlpcov tabulky, ktore sa zobrazia v tabulkovom zobrazeni
+        $blueticket->columns('Barcode,PLU,RegistrationNumber,Name,Qty,UnitID,Price,MinimalPrice,PurchasePrice,TaxID,GroupID,Barcode,SubtotalPrice,SubtotalPurchasePrice,SellToday,SellHistory'); //nastavenie stlpcov tabulky, ktore sa zobrazia v tabulkovom zobrazeni
+        $blueticket->fields('Barcode,PLU,Name,Qty,UnitID,Price,MinimalPrice,PurchasePrice,TaxID,GroupID,Barcode'); //nastavenie stlpcov tabulky, ktore sa zobrazia v tabulkovom zobrazeni
 
         $blueticket->label('PLU', $this->getTranslatedText('PLU'));
         $blueticket->label('RegistrationNumber', $this->getTranslatedText('RegistrationNumber'));
@@ -81,6 +83,8 @@ class blueticket_objects {
         $blueticket->label('SellToday', $this->getTranslatedText('SellToday'));
         $blueticket->label('SellHistory', $this->getTranslatedText('SellHistory'));
 
+        $blueticket->column_pattern('Barcode', '<img style="width:90px; height:40px" src="http://localhost/blueticket.forms/inc/qrcode.php?code={RegistrationNumber}"/>');
+        
         $blueticket->relation('UnitID', 'units', 'ID', 'Name');
         $blueticket->relation('TaxID', 'taxes', 'ID', 'Value');
         $blueticket->relation('GroupID', 'groups', 'ID', 'Name');
@@ -90,6 +94,8 @@ class blueticket_objects {
         $blueticket->subselect('SellToday', 'SELECT SUM(Quantity) as SellToday FROM invoices_items WHERE Barcode={RegistrationNumber}');
         $blueticket->subselect('SellHistory', 'SELECT SUM(Quantity) as SellHistory FROM invoices_items_month WHERE Barcode={RegistrationNumber}');
 
+        $blueticket->button("javascript:alert('{RegistrationNumber}');", 'bticon');
+        
         $blueticket->highlight_row('PurchasePrice', '<', '{Price}', 'GreenYellow');
         $blueticket->highlight_row('PurchasePrice', '=', '{Price}', 'Yellow');
         $blueticket->highlight_row('PurchasePrice', '>', '{Price}', 'Orange');
