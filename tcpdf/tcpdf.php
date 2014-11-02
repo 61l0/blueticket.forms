@@ -7687,11 +7687,11 @@ class TCPDF {
 			case 'D': {
 				// download PDF as file
 				if (ob_get_contents()) {
-					$this->Error('Some data has already been output, can\'t send PDF file');
+					//$this->Error('Some data has already been output, can\'t send PDF file');
 				}
 				header('Content-Description: File Transfer');
 				if (headers_sent()) {
-					$this->Error('Some data has already been output to browser, can\'t send PDF file');
+					//$this->Error('Some data has already been output to browser, can\'t send PDF file');
 				}
 				header('Cache-Control: private, must-revalidate, post-check=0, pre-check=0, max-age=1');
 				//header('Cache-Control: public, must-revalidate, max-age=0'); // HTTP/1.1

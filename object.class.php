@@ -12,7 +12,39 @@ use PFBC\Element;
 require_once("pfbc/PFBC/Form.php");
 require_once("forms/blueticket_forms.php");
 
+require_once ('tcpdf/tcpdf.php');
 require_once ('tcpdf/tcpdf_barcodes_2d.php');
+
+class PDFPrinter extends TCPDF {
+
+    public function CreateTextBox($textval, $x = 0, $y, $width = 0, $height = 10, $fontsize = 4, $fontstyle = '', $align = 'L') {
+        $this->SetXY($x, $y);
+        $this->SetFont('freesans', $fontstyle, $fontsize);
+        $this->Cell($width, $height, $textval, 0, false, $align);
+    }
+
+    public function CreateBarcode($code, $x, $y, $w, $h) {
+        $style = array(
+            'position' => '',
+            'align' => 'C',
+            'stretch' => false,
+            'fitwidth' => true,
+            'cellfitalign' => '',
+            'border' => true,
+            'hpadding' => 'auto',
+            'vpadding' => 'auto',
+            'fgcolor' => array(0, 0, 0),
+            'bgcolor' => false, //array(255,255,255),
+            'text' => true,
+            'font' => 'courier',
+            'fontsize' => 8,
+            'stretchtext' => 4
+        );
+
+        $this->write1DBarcode($code, 'C39', $x, $y, $w, $h, 0.4, $style, 'N');
+    }
+
+}
 
 class blueticket_objects {
 
@@ -47,12 +79,50 @@ class blueticket_objects {
         $return .= '<a href="?report=cards" class="btn btn-primary" style="width:150px; height:30px; margin-top:5px; margin-right:5px">Cenníky</a>';
         $return .= '<a href="?report=stats" class="btn btn-primary" style="width:150px; height:30px; margin-top:5px; margin-right:5px">Štatistika</a>';
         $return .= '<a href="?report=trans" class="btn btn-primary" style="width:150px; height:30px; margin-top:5px; margin-right:5px">Preklad</a>';
+        $return .= '<a href="?report=print" class="btn btn-primary" style="width:150px; height:30px; margin-top:5px; margin-right:5px">Preklad</a>';
 
         $return .= '</div>';
 
         $return .= '<div style="clear:both"></div>';
 
         return $return;
+    }
+
+    function printItems() {
+        error_reporting(0);
+        session_start();
+        $pdf = new PDFPrinter(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
+
+        $pdf->setPrintHeader(false);
+        $pdf->setPrintFooter(false);
+        $pdf->SetMargins(5, 5, 5);
+        $pdf->SetAutoPageBreak(TRUE, 0);
+        $pdf->AddPage();
+
+        $x = 0;
+        $y = 0;
+
+
+        foreach ($_SESSION['print_items'] as $row) {
+            if ($x == 5) {
+                if ($y == 12) {
+                    $x = 0;
+                    $y = 0;
+                    $pdf->AddPage();
+                } else {
+                    $y++;
+                    $x = 0;
+                }
+            }
+
+            //setlocale(LC_CTYPE, 'cs_CZ');
+            //$row_name = iconv('UTF-8', 'ASCII//TRANSLIT', $row['name']);
+            $pdf->CreateTextBox($row['name'], $x * 38 + 10, $y * 21.5 + 10);
+            $pdf->CreateBarcode($row['reg'], $x * 38 + 10, $y * 21.5 + 20, 38, 11.5);
+            $x++;
+        }
+
+        $pdf->Output('doc.pdf', 'D');
     }
 
     function generateItems() {
@@ -64,7 +134,7 @@ class blueticket_objects {
         $blueticket->order_by('Name', 'ASC');
         $blueticket->table_name($this->getTranslatedText('Items')); //titulok zobrazenia tabulky na stranke
 
-        $blueticket->columns('Barcode,PLU,RegistrationNumber,Name,Qty,UnitID,Price,MinimalPrice,PurchasePrice,TaxID,GroupID,Barcode,SubtotalPrice,SubtotalPurchasePrice,SellToday,SellHistory'); //nastavenie stlpcov tabulky, ktore sa zobrazia v tabulkovom zobrazeni
+        $blueticket->columns('PLU,RegistrationNumber,Name,Qty,UnitID,Price,MinimalPrice,PurchasePrice,TaxID,GroupID,SubtotalPrice,SubtotalPurchasePrice,SellToday,SellHistory'); //nastavenie stlpcov tabulky, ktore sa zobrazia v tabulkovom zobrazeni
         $blueticket->fields('Barcode,PLU,Name,Qty,UnitID,Price,MinimalPrice,PurchasePrice,TaxID,GroupID,Barcode'); //nastavenie stlpcov tabulky, ktore sa zobrazia v tabulkovom zobrazeni
 
         $blueticket->label('PLU', $this->getTranslatedText('PLU'));
@@ -84,7 +154,7 @@ class blueticket_objects {
         $blueticket->label('SellHistory', $this->getTranslatedText('SellHistory'));
 
         $blueticket->column_pattern('Barcode', '<img style="width:90px; height:40px" src="http://localhost/blueticket.forms/inc/qrcode.php?code={RegistrationNumber}"/>');
-        
+
         $blueticket->relation('UnitID', 'units', 'ID', 'Name');
         $blueticket->relation('TaxID', 'taxes', 'ID', 'Value');
         $blueticket->relation('GroupID', 'groups', 'ID', 'Name');
@@ -94,8 +164,8 @@ class blueticket_objects {
         $blueticket->subselect('SellToday', 'SELECT SUM(Quantity) as SellToday FROM invoices_items WHERE Barcode={RegistrationNumber}');
         $blueticket->subselect('SellHistory', 'SELECT SUM(Quantity) as SellHistory FROM invoices_items_month WHERE Barcode={RegistrationNumber}');
 
-        $blueticket->button("javascript:alert('{RegistrationNumber}');", 'bticon');
-        
+        $blueticket->button("javascript:item_select('{RegistrationNumber}','{Name}');", 'bticon');
+
         $blueticket->highlight_row('PurchasePrice', '<', '{Price}', 'GreenYellow');
         $blueticket->highlight_row('PurchasePrice', '=', '{Price}', 'Yellow');
         $blueticket->highlight_row('PurchasePrice', '>', '{Price}', 'Orange');
@@ -125,7 +195,7 @@ class blueticket_objects {
         $bt_item_invoice->label('Quantity', $this->getTranslatedText('Quantity'));
         $bt_item_invoice->label('Price', $this->getTranslatedText('Price'));
         $bt_item_invoice->label('SubTotal', $this->getTranslatedText('SubTotal'));
-        
+
         $bt_item_invoice->sum('SubTotal');
 
 
@@ -169,9 +239,9 @@ class blueticket_objects {
         $blueticket->label('UserID', $this->getTranslatedText('UserID'));
         $blueticket->label('InvoiceTotal', $this->getTranslatedText('InvoiceTotal'));
         $blueticket->label('InvoiceTotalToday', $this->getTranslatedText('InvoiceTotalToday'));
-        $blueticket->subselect('UserName','SELECT Username FROM users WHERE ID={UserID}');
-        
-        
+        $blueticket->subselect('UserName', 'SELECT Username FROM users WHERE ID={UserID}');
+
+
         $blueticket->subselect('InvoiceTotal', 'SELECT SUM(Price*Quantity) as InvoiceTotal FROM invoices_items_month WHERE InvoiceNumber={InvoiceNumber}');
         $blueticket->subselect('InvoiceTotalToday', 'SELECT SUM(Price*Quantity) as InvoiceTotal FROM invoices_items WHERE InvoiceNumber={InvoiceNumber}');
         $blueticket->order_by('InvoiceDateTime', 'DESC');
@@ -215,14 +285,13 @@ class blueticket_objects {
 
         return $blueticket->render();
     }
-    
-    function generateTranslate()
-    {
+
+    function generateTranslate() {
         $blueticket = blueticket_forms::get_instance();
-        
+
         $blueticket->table('translate');
         $blueticket->table_name($this->getTranslatedText('Translate'));
-        
+
         return $blueticket->render();
     }
 

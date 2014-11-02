@@ -2,7 +2,7 @@
 class blueticket_forms_config
 {
     // default connection
-    public static $dbname = 'posdb'; // Your database name
+    public static $dbname = 'posdb1'; // Your database name
     public static $dbuser = 'root'; // Your database username
     public static $dbpass = 'awqbn154'; // // Your database password
     public static $dbhost = 'localhost'; // Your database host, 'localhost' is default.
