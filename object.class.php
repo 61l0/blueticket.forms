@@ -18,33 +18,38 @@ require_once ('tcpdf/tcpdf_barcodes_2d.php');
 class InvoicePDF extends TCPDF {
 
     public function Header() {
+        $bt = new blueticket_objects();
+
         $this->SetY(15);
-        $this->SetFont(PDF_FONT_NAME_MAIN, 'I', 8);
-        $this->Cell(0, 10, 'FUNSTAR s.r.o.', 0, false, 'C');
+        $this->SetFont('freesans', 'B', 8);
+        //$this->Cell(0, 10, '<em>' . $bt->getTranslatedText('LicenseOwner') . '</em>', 0, false, 'C', FALSE, '', 1);
+        $this->MultiCell(175, 10, nl2br($bt->getTranslatedText('LicenseOwner')), 0, 'C', 0, 1, '', '', true, null, true);
     }
 
     public function Footer() {
         $this->SetY(-15);
-        $this->SetFont(PDF_FONT_NAME_MAIN, 'I', 8);
+        $this->SetFont('freesans', 'I', 8);
         $this->Cell(0, 10, 'Generované systémom blueticket™ (http://www.blueticket.eu)', 0, false, 'C');
     }
 
     public function CreateTextBox($textval, $x = 0, $y, $width = 0, $height = 10, $fontsize = 10, $fontstyle = '', $align = 'L') {
         $this->SetXY($x + 20, $y); // 20 = margin left
-        $this->SetFont(PDF_FONT_NAME_MAIN, $fontstyle, $fontsize);
+        $this->SetFont('freesans', $fontstyle, $fontsize);
         $this->Cell($width, $height, $textval, 0, false, $align);
     }
 
     public function CreateInvoice() {
+        $bt = new blueticket_objects();
+
         // create a PDF object
         $pdf = new InvoicePDF(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
 
 // set document (meta) information
         $pdf->SetCreator(PDF_CREATOR);
-        $pdf->SetAuthor('Olaf Lederer');
-        $pdf->SetTitle('TCPDF Example');
-        $pdf->SetSubject('TCPDF Tutorial');
-        $pdf->SetKeywords('TCPDF, PDF, example, tutorial');
+        $pdf->SetAuthor('blueticket s.r.o.');
+        $pdf->SetTitle('blueticket document');
+        $pdf->SetSubject('Document');
+        $pdf->SetKeywords('PDF');
 
 // add a page
         $pdf->AddPage();
@@ -56,27 +61,20 @@ class InvoicePDF extends TCPDF {
         $pdf->CreateTextBox('Zip, city name', 0, 70, 80, 10, 10);
 
 // invoice title / number
-        $pdf->CreateTextBox('Invoice #201012345', 0, 90, 120, 20, 16);
+        $pdf->CreateTextBox($bt->getTranslatedText('IssueCard') . ' #201012345', 0, 90, 120, 20, 16);
 
 // date, order ref
-        $pdf->CreateTextBox('Date: ' . date('Y-m-d'), 0, 100, 0, 10, 10, '', 'R');
-        $pdf->CreateTextBox('Order ref.: #6765765', 0, 105, 0, 10, 10, '', 'R');
-
+        $pdf->CreateTextBox($bt->getTranslatedText('Date') . ': ' . date('d-m-Y'), 0, 100, 0, 10, 10, '', 'R');
+        //$pdf->CreateTextBox('Order ref.: #6765765', 0, 105, 0, 10, 10, '', 'R');
 
         //items
         // list headers
-        $pdf->CreateTextBox('Quantity', 0, 120, 20, 10, 10, 'B', 'C');
-        $pdf->CreateTextBox('Product or service', 20, 120, 90, 10, 10, 'B');
-        $pdf->CreateTextBox('Price', 110, 120, 30, 10, 10, 'B', 'R');
-        $pdf->CreateTextBox('Amount', 140, 120, 30, 10, 10, 'B', 'R');
+        $pdf->CreateTextBox($bt->getTranslatedText('Quantity'), 0, 120, 20, 10, 10, 'B', 'C');
+        $pdf->CreateTextBox($bt->getTranslatedText('Name'), 20, 120, 90, 10, 10, 'B');
+        $pdf->CreateTextBox($bt->getTranslatedText('Price'), 110, 120, 30, 10, 10, 'B', 'R');
+        $pdf->CreateTextBox($bt->getTranslatedText('Subtotal'), 140, 120, 30, 10, 10, 'B', 'R');
 
         $pdf->Line(20, 129, 195, 129);
-
-// some example data
-        $orders[] = array('quant' => 5, 'descr' => '.com domain registration', 'price' => 9.95);
-        $orders[] = array('quant' => 3, 'descr' => '.net domain name renewal', 'price' => 11.95);
-        $orders[] = array('quant' => 1, 'descr' => 'SSL certificate 256-Byte encryption', 'price' => 99.95);
-        $orders[] = array('quant' => 1, 'descr' => '25GB VPS Hosting, 200GB Bandwidth', 'price' => 19.95);
 
         $currY = 128;
         $total = 0;
@@ -94,14 +92,13 @@ class InvoicePDF extends TCPDF {
         //footer
         //
         // output the total row
-        $pdf->CreateTextBox('Total', 20, $currY + 5, 135, 10, 10, 'B', 'R');
-        $pdf->CreateTextBox('$' . number_format($total, 2, '.', ''), 140, $currY + 5, 30, 10, 10, 'B', 'R');
+        $pdf->CreateTextBox($bt->getTranslatedText('Total'), 5, $currY + 5, 135, 10, 10, 'B', 'R');
+        $pdf->CreateTextBox(number_format($total, 2, '.', ' ') . ' €', 140, $currY + 5, 30, 10, 10, 'B', 'R');
 
 // some payment instructions or information
         $pdf->setXY(20, $currY + 30);
-        $pdf->SetFont(PDF_FONT_NAME_MAIN, '', 10);
-        $pdf->MultiCell(175, 10, '<em>Lorem ipsum dolor sit amet, consectetur adipiscing elit</em>. 
-Vestibulum sagittis venenatis urna, in pellentesque ipsum pulvinar eu. In nec <a href="http://www.google.com/">nulla libero</a>, eu sagittis diam. Aenean egestas pharetra urna, et tristique metus egestas nec. Aliquam erat volutpat. Fusce pretium dapibus tellus.', 0, 'L', 0, 1, '', '', true, null, true);
+        $pdf->SetFont('freesans', '', 10);
+        $pdf->MultiCell(175, 10, $bt->getTranslatedText('InvoiceFooter'), 0, 'L', 0, 1, '', '', true, null, true);
 
 //Close and output PDF document
         $pdf->Output('invoice.pdf', 'D');
@@ -169,7 +166,7 @@ class blueticket_objects {
 //$this->lang = 'sk';
     }
 
-    function getTranslatedText($par_Text, $par_lang = 'sk') {
+    public function getTranslatedText($par_Text, $par_lang = 'sk') {
         $par_lang = $this->lang;
 
 //$blueticket_db = new blueticket_forms_db();
