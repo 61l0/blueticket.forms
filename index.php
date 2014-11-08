@@ -13,7 +13,11 @@ if (isset($_GET['report'])) {
         case 'print_items_qr':
             echo $bt->printItems('QR');
             break;
-        case 'print_invoice':
+        case 'print_purchase':
+            $inv = new InvoicePDF();
+            echo $inv->CreateInvoice(true);
+            break;
+        case 'print_shipment':
             $inv = new InvoicePDF();
             echo $inv->CreateInvoice();
             break;
@@ -114,7 +118,7 @@ if (isset($_GET['report'])) {
         <?php
         echo $bt->generateMenu();
         ?>
-        <div style="overflow: auto; position: absolute; top:50px; left: 10px; right: 10px; bottom: 10px; border: 1px solid graytext">
+        <div style="overflow: auto; position: absolute; top:50px; left: 10px; padding:10px 10px 10px 10px; right: 10px; bottom: 10px; border: 1px solid graytext">
             <?php
             if (isset($_GET['report'])) {
                 switch ($_GET['report']) {
@@ -126,6 +130,9 @@ if (isset($_GET['report'])) {
                         break;
                     case 'trans':
                         echo $bt->generateTranslate();
+                        break;
+                    case 'partners':
+                        echo $bt->generatePartners();
                         break;
                 }
             } else {

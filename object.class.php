@@ -22,7 +22,7 @@ class InvoicePDF extends TCPDF {
 
         $this->SetY(15);
         $this->SetFont('freesans', 'B', 8);
-        //$this->Cell(0, 10, '<em>' . $bt->getTranslatedText('LicenseOwner') . '</em>', 0, false, 'C', FALSE, '', 1);
+//$this->Cell(0, 10, '<em>' . $bt->getTranslatedText('LicenseOwner') . '</em>', 0, false, 'C', FALSE, '', 1);
         $this->MultiCell(175, 10, nl2br($bt->getTranslatedText('LicenseOwner')), 0, 'C', 0, 1, '', '', true, null, true);
     }
 
@@ -38,70 +38,84 @@ class InvoicePDF extends TCPDF {
         $this->Cell($width, $height, $textval, 0, false, $align);
     }
 
-    public function CreateInvoice() {
-        $bt = new blueticket_objects();
+    public function CreateInvoice($par_purchase = false) {
+        if (isset($_SESSION['selected_partner']) && $_SESSION['selected_partner'] > 0) {
+            $bt = new blueticket_objects();
 
-        // create a PDF object
-        $pdf = new InvoicePDF(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
+// create a PDF object
+            $pdf = new InvoicePDF(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
 
 // set document (meta) information
-        $pdf->SetCreator(PDF_CREATOR);
-        $pdf->SetAuthor('blueticket s.r.o.');
-        $pdf->SetTitle('blueticket document');
-        $pdf->SetSubject('Document');
-        $pdf->SetKeywords('PDF');
+            $pdf->SetCreator(PDF_CREATOR);
+            $pdf->SetAuthor('blueticket s.r.o.');
+            $pdf->SetTitle('blueticket document');
+            $pdf->SetSubject('Document');
+            $pdf->SetKeywords('PDF');
 
 // add a page
-        $pdf->AddPage();
+            $pdf->AddPage();
+
+            $blueticket = blueticket_forms_db::get_instance();
+
+            $blueticket->query("SELECT * FROM partners WHERE ID='" . $_SESSION['selected_partner'] . "'");
+
+            $myrow = $blueticket->row();
+
+            $partner_id = $myrow['ID'];
 
 // create address box
-        $pdf->CreateTextBox('Customer name Inc.', 0, 55, 80, 10, 10, 'B');
-        $pdf->CreateTextBox('Mr. Tom Cat', 0, 60, 80, 10, 10);
-        $pdf->CreateTextBox('Street address', 0, 65, 80, 10, 10);
-        $pdf->CreateTextBox('Zip, city name', 0, 70, 80, 10, 10);
+            $pdf->CreateTextBox($myrow['Name'], 0, 55, 80, 10, 10, 'B');
+            $pdf->CreateTextBox($myrow['Address'], 0, 60, 80, 10, 10);
+            $pdf->CreateTextBox($myrow['ZIP'] . ' ' . $myrow['City'], 0, 65, 80, 10, 10);
+            $pdf->CreateTextBox($myrow['State'], 0, 70, 80, 10, 10);
 
 // invoice title / number
-        $pdf->CreateTextBox($bt->getTranslatedText('IssueCard') . ' #201012345', 0, 90, 120, 20, 16);
+            if ($par_purchase == TRUE)
+                $pdf->CreateTextBox($bt->getTranslatedText('PurchaseCard') . ' #201012345', 0, 90, 120, 20, 16);
+            else
+                $pdf->CreateTextBox($bt->getTranslatedText('IssueCard') . ' #201012345', 0, 90, 120, 20, 16);
 
 // date, order ref
-        $pdf->CreateTextBox($bt->getTranslatedText('Date') . ': ' . date('d-m-Y'), 0, 100, 0, 10, 10, '', 'R');
-        //$pdf->CreateTextBox('Order ref.: #6765765', 0, 105, 0, 10, 10, '', 'R');
+            $pdf->CreateTextBox($bt->getTranslatedText('Date') . ': ' . date('d-m-Y'), 0, 100, 0, 10, 10, '', 'R');
+//$pdf->CreateTextBox('Order ref.: #6765765', 0, 105, 0, 10, 10, '', 'R');
+//items
+// list headers
+            $pdf->CreateTextBox($bt->getTranslatedText('Quantity'), 0, 120, 20, 10, 10, 'B', 'C');
+            $pdf->CreateTextBox($bt->getTranslatedText('Name'), 20, 120, 90, 10, 10, 'B');
+            $pdf->CreateTextBox($bt->getTranslatedText('Price'), 110, 120, 30, 10, 10, 'B', 'R');
+            $pdf->CreateTextBox($bt->getTranslatedText('Subtotal'), 140, 120, 30, 10, 10, 'B', 'R');
 
-        //items
-        // list headers
-        $pdf->CreateTextBox($bt->getTranslatedText('Quantity'), 0, 120, 20, 10, 10, 'B', 'C');
-        $pdf->CreateTextBox($bt->getTranslatedText('Name'), 20, 120, 90, 10, 10, 'B');
-        $pdf->CreateTextBox($bt->getTranslatedText('Price'), 110, 120, 30, 10, 10, 'B', 'R');
-        $pdf->CreateTextBox($bt->getTranslatedText('Subtotal'), 140, 120, 30, 10, 10, 'B', 'R');
+            $pdf->Line(20, 129, 195, 129);
 
-        $pdf->Line(20, 129, 195, 129);
+            $currY = 128;
+            $total = 0;
+            foreach ($_SESSION['selected_items'] as $row) {
+                $pdf->CreateTextBox($row['qty'], 0, $currY, 20, 10, 10, '', 'C');
+                $pdf->CreateTextBox($row['reg'] . ' - ' . $row['name'], 20, $currY, 90, 10, 10, '');
+                $pdf->CreateTextBox(number_format($row['price'], 2, '.', ' ') . ' €', 110, $currY, 30, 10, 10, '', 'R');
+                $amount = $row['qty'] * $row['price'];
+                $pdf->CreateTextBox(number_format($amount, 2, '.', ' ') . ' €', 140, $currY, 30, 10, 10, '', 'R');
+                $currY = $currY + 5;
+                $total = $total + $amount;
+            }
+            $pdf->Line(20, $currY + 4, 195, $currY + 4);
 
-        $currY = 128;
-        $total = 0;
-        foreach ($_SESSION['selected_items'] as $row) {
-            $pdf->CreateTextBox($row['qty'], 0, $currY, 20, 10, 10, '', 'C');
-            $pdf->CreateTextBox($row['reg'] . ' - ' . $row['name'], 20, $currY, 90, 10, 10, '');
-            $pdf->CreateTextBox(number_format($row['price'], 2, '.', ' ') . ' €', 110, $currY, 30, 10, 10, '', 'R');
-            $amount = $row['qty'] * $row['price'];
-            $pdf->CreateTextBox(number_format($amount, 2, '.', ' ') . ' €', 140, $currY, 30, 10, 10, '', 'R');
-            $currY = $currY + 5;
-            $total = $total + $amount;
-        }
-        $pdf->Line(20, $currY + 4, 195, $currY + 4);
-
-        //footer
-        //
-        // output the total row
-        $pdf->CreateTextBox($bt->getTranslatedText('Total'), 5, $currY + 5, 135, 10, 10, 'B', 'R');
-        $pdf->CreateTextBox(number_format($total, 2, '.', ' ') . ' €', 140, $currY + 5, 30, 10, 10, 'B', 'R');
+//footer
+//
+            // output the total row
+            $pdf->CreateTextBox($bt->getTranslatedText('Total'), 5, $currY + 5, 135, 10, 10, 'B', 'R');
+            $pdf->CreateTextBox(number_format($total, 2, '.', ' ') . ' €', 140, $currY + 5, 30, 10, 10, 'B', 'R');
 
 // some payment instructions or information
-        $pdf->setXY(20, $currY + 30);
-        $pdf->SetFont('freesans', '', 10);
-        $pdf->MultiCell(175, 10, $bt->getTranslatedText('InvoiceFooter'), 0, 'L', 0, 1, '', '', true, null, true);
+            $pdf->setXY(20, $currY + 30);
+            $pdf->SetFont('freesans', '', 10);
+            $pdf->MultiCell(175, 10, $bt->getTranslatedText('InvoiceFooter'), 0, 'L', 0, 1, '', '', true, null, true);
 
 //Close and output PDF document
-        $pdf->Output('invoice.pdf', 'D');
+            $pdf->Output('invoice.pdf', 'D');
+        } else {
+            header('location: index.php?report=partners');
+        }
     }
 
 }
@@ -166,6 +180,13 @@ class blueticket_objects {
 //$this->lang = 'sk';
     }
 
+    public function generateMainScreen() {
+        $form = new Form("form-main");
+        $button = new Element\Button("Číselníky");
+        $form->addElement($button);
+        $form->render();
+    }
+
     public function getTranslatedText($par_Text, $par_lang = 'sk') {
         $par_lang = $this->lang;
 
@@ -190,8 +211,9 @@ class blueticket_objects {
     function generateMenu() {
         $return = '<div style="width:100%; height:50px;padding-left:5px">';
 
-        $return .= '<a href="?report=cards" class="btn btn-primary" style="width:150px; height:30px; margin-top:5px; margin-right:5px">Cenníky</a>';
-        $return .= '<a href="?report=stats" class="btn btn-primary" style="width:150px; height:30px; margin-top:5px; margin-right:5px">Štatistika</a>';
+        $return .= '<a href="?report=cards" class="btn btn-primary" style="width:150px; height:30px; margin-top:5px; margin-right:5px">Karty</a>';
+        $return .= '<a href="?report=stats" class="btn btn-primary" style="width:150px; height:30px; margin-top:5px; margin-right:5px">Doklady</a>';
+        $return .= '<a href="?report=partners" class="btn btn-primary" style="width:150px; height:30px; margin-top:5px; margin-right:5px">Partneri</a>';
         $return .= '<a href="?report=trans" class="btn btn-primary" style="width:150px; height:30px; margin-top:5px; margin-right:5px">Preklad</a>';
 
         $return .= '</div>';
@@ -229,8 +251,8 @@ class blueticket_objects {
                 }
             }
 
-            //setlocale(LC_CTYPE, 'cs_CZ');
-            //$row_name = iconv('UTF-8', 'ASCII//TRANSLIT', $row['name']);
+//setlocale(LC_CTYPE, 'cs_CZ');
+//$row_name = iconv('UTF-8', 'ASCII//TRANSLIT', $row['name']);
             $pdf->CreateTextBox($row['name'], $x * 38 + 7 + $x * 1.5, $y * 22.0 + 5);
             switch ($par_Type) {
                 case 'UPC':
@@ -310,9 +332,10 @@ $("#dialog").dialog("close");
 </div>
 ';
 
-        echo '<a href="?report=print_items_bc" class="btn btn-primary" style="width:150px; height:30px; margin-top:10px; margin-left:10px">Tlač štítkov UPC</a>';
-        echo '<a href="?report=print_items_qr" class="btn btn-primary" style="width:150px; height:30px; margin-top:10px; margin-left:10px">Tlač štítkov QR</a>';
-        echo '<a href="?report=print_invoice" class="btn btn-primary" style="width:150px; height:30px; margin-top:10px; margin-left:10px">Tlač faktúry</a>';
+        echo '<a href="?report=print_items_bc" class="btn btn-primary" style="width:150px; height:30px; margin-top:10px; margin-left:10px">' . $this->getTranslatedText('Tlač štítkov UPC') . '</a>';
+        echo '<a href="?report=print_items_qr" class="btn btn-primary" style="width:150px; height:30px; margin-top:10px; margin-left:10px">' . $this->getTranslatedText('Tlač štítkov QR') . '</a>';
+        echo '<a href="?report=print_shipment" class="btn btn-primary" style="width:150px; height:30px; margin-top:10px; margin-left:10px">' . $this->getTranslatedText('Tlač výdajky') . '</a>';
+        echo '<a href="?report=print_purchase" class="btn btn-primary" style="width:150px; height:30px; margin-top:10px; margin-left:10px">' . $this->getTranslatedText('Tlač príjemky') . '</a>';
 
         $blueticket->table('items'); //nazov tabulky v databaze
         $blueticket->order_by('Name', 'ASC');
@@ -333,7 +356,7 @@ $("#dialog").dialog("close");
         $blueticket->label('GroupID', $this->getTranslatedText('GroupID'));
         $blueticket->label('Barcode', $this->getTranslatedText('Barcode'));
 
-        $blueticket->column_pattern('Barcode', '<img style="width:90px; height:40px" src="http://localhost/blueticket.forms/inc/qrcode.php?code={RegistrationNumber}"/>');
+        $blueticket->column_pattern('Barcode', '<img style="width:90px; height:90px" src="inc/qrcode.php?code={RegistrationNumber}"/>');
 
         $blueticket->relation('UnitID', 'units', 'ID', 'Name');
         $blueticket->relation('TaxID', 'taxes', 'ID', 'Value');
@@ -400,6 +423,62 @@ $("#dialog").dialog("close");
 
         $bt_item_invoice_month->sum('SubTotal');
 
+
+        return $blueticket->render();
+    }
+
+    function generatePartners() {
+        $blueticket = blueticket_forms::get_instance();
+
+        echo '<script type="text/javascript">
+            function click_partner(par_id) {
+                $.ajax({
+                    url: "add_print_partner.php?id=" + par_id,
+                }).done(function () {
+                alert("Partner ID: " + par_id + " bol úspešne zvolený");
+});
+};
+</script>';
+
+        $blueticket->table('partners');
+        $blueticket->table_name($this->getTranslatedText('Partners'));
+        $blueticket->default_tab($this->getTranslatedText('Partners'));
+        $blueticket->columns('ID, Name, Address, City, ZIP, PID, VAT, VATID'); //nastavenie stlpcov tabulky, ktore sa zobrazia v tabulkovom zobrazeni
+
+        $blueticket->fields('Name, Address, City, ZIP, State, PID, VAT, VATID, IBAN, SWIFT, Bank, Description'); //nastavenie stlpcov tabulky, ktore sa zobrazia v tabulkovom zobrazeni
+
+        $blueticket->label('Name', $this->getTranslatedText('Name'));
+        $blueticket->label('Address', $this->getTranslatedText('Address'));
+        $blueticket->label('City', $this->getTranslatedText('City'));
+        $blueticket->label('ZIP', $this->getTranslatedText('ZIP'));
+        $blueticket->label('State', $this->getTranslatedText('State'));
+        $blueticket->label('PID', $this->getTranslatedText('PID'));
+        $blueticket->label('VAT', $this->getTranslatedText('VAT'));
+        $blueticket->label('VATID', $this->getTranslatedText('VATID'));
+        $blueticket->label('IBAN', $this->getTranslatedText('IBAN'));
+        $blueticket->label('SWIFT', $this->getTranslatedText('SWIFT'));
+        $blueticket->label('Bank', $this->getTranslatedText('Bank'));
+        $blueticket->label('Description', $this->getTranslatedText('Description'));
+
+        $blueticket->button("javascript:click_partner('{ID}');", $this->getTranslatedText('Item labels'), 'glyphicon glyphicon-ok');
+
+        $bt_item_invoice_month = $blueticket->nested_table($this->getTranslatedText('InvoicesItemsMonth'), 'ID', 'invoices_items_month', 'CartNr');
+        $bt_item_invoice_month->columns('InvoiceDateTime, InvoiceNumber, Barcode, Name, CartNr, Quantity, Price, SubTotal');
+        $bt_item_invoice_month->subselect('SubTotal', '{Price}*{Quantity}');
+
+        $bt_item_invoice_month->label('InvoiceDateTime', $this->getTranslatedText('InvoiceDateTime'));
+        $bt_item_invoice_month->label('InvoiceNumber', $this->getTranslatedText('InvoiceNumber'));
+        $bt_item_invoice_month->label('Barcode', $this->getTranslatedText('Barcode'));
+        $bt_item_invoice_month->label('Name', $this->getTranslatedText('Name'));
+        $bt_item_invoice_month->label('CartNr', $this->getTranslatedText('CartNr'));
+        $bt_item_invoice_month->label('Quantity', $this->getTranslatedText('Quantity'));
+        $bt_item_invoice_month->label('Price', $this->getTranslatedText('Price'));
+        $bt_item_invoice_month->label('SubTotal', $this->getTranslatedText('SubTotal'));
+        $bt_item_invoice_month->column_class('Quantity,Price,SubTotal', 'align-right');
+        $bt_item_invoice_month->change_type('Quantity,Price,SubTotal', 'price', '0');
+        $bt_item_invoice_month->subselect('InvoiceDateTime', 'SELECT InvoiceDateTime FROM invoices WHERE InvoiceNumber={InvoiceNumber}');
+
+        $bt_item_invoice_month->sum('SubTotal');
 
         return $blueticket->render();
     }
@@ -477,5 +556,4 @@ $("#dialog").dialog("close");
 
         return $blueticket->render();
     }
-
 }
