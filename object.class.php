@@ -38,7 +38,7 @@ class InvoicePDF extends TCPDF {
         $this->Cell($width, $height, $textval, 0, false, $align);
     }
 
-    public function CreateInvoice($par_purchase = false) {
+    public function CreateInvoice($par_purchase = false, $par_write = FALSE) {
         if (isset($_SESSION['selected_partner']) && $_SESSION['selected_partner'] > 0) {
             $bt = new blueticket_objects();
 
@@ -90,10 +90,39 @@ class InvoicePDF extends TCPDF {
             $currY = 128;
             $total = 0;
             foreach ($_SESSION['selected_items'] as $row) {
+                if ($par_write) {
+                    $btdb = blueticket_forms_db::get_instance();
+
+                    if ($par_purchase)
+                        $price = $row['purchase_price'];
+                    else
+                        $price = $row['price'];
+
+                    $btdb->query("SELECT * FROM items WHERE RegistrationNumber='" . $row['reg'] . "'");
+                    $myrow = $btdb->row();
+                    $tax = $myrow['TaxID'];
+                    $type = $myrow['TypeID'];
+                    $btdb->query("SELECT * FROM units WHERE ID='" . $myrow['UnitID'] . "'");
+                    $myrow = $btdb->row();
+
+                    $unit = $myrow['Name'];
+
+                    $btdb->query("SELECT * FROM taxes WHERE ID='$tax'");
+                    $myrow = $btdb->row();
+
+                    $tax = $myrow['Value'];
+
+                    $btdb->query("INSERT INTO current_accounting(CartNr,RegistrationNumber,Name,Price,Unit,Tax,Qty,TypeID,Printed) VALUES('$partner_id','" . $row['reg'] . "', '" . $row['name'] . "',$price,'$unit',$tax, " . $row['qty'] . ", $type, 0)");
+                }
                 $pdf->CreateTextBox($row['qty'], 0, $currY, 20, 10, 10, '', 'C');
                 $pdf->CreateTextBox($row['reg'] . ' - ' . $row['name'], 20, $currY, 90, 10, 10, '');
-                $pdf->CreateTextBox(number_format($row['price'], 2, '.', ' ') . ' €', 110, $currY, 30, 10, 10, '', 'R');
-                $amount = $row['qty'] * $row['price'];
+                if ($par_purchase) {
+                    $pdf->CreateTextBox(number_format($row['purchase_price'], 2, '.', ' ') . ' €', 110, $currY, 30, 10, 10, '', 'R');
+                    $amount = $row['qty'] * $row['purchase_price'];
+                } else {
+                    $pdf->CreateTextBox(number_format($row['price'], 2, '.', ' ') . ' €', 110, $currY, 30, 10, 10, '', 'R');
+                    $amount = $row['qty'] * $row['price'];
+                }
                 $pdf->CreateTextBox(number_format($amount, 2, '.', ' ') . ' €', 140, $currY, 30, 10, 10, '', 'R');
                 $currY = $currY + 5;
                 $total = $total + $amount;
@@ -113,6 +142,11 @@ class InvoicePDF extends TCPDF {
 
 //Close and output PDF document
             $pdf->Output('invoice.pdf', 'D');
+            
+            if($par_write)
+            {
+                $bt->unset_all();
+            }
         } else {
             header('location: index.php?report=partners');
         }
@@ -268,6 +302,14 @@ class blueticket_objects {
         $pdf->Output('print_items.pdf', 'D');
     }
 
+    function unset_all() {
+        unset($_SESSION['print_items']);
+        unset($_SESSION['selected_items']);
+        unset($_SESSION['selected_partner']);
+        
+        return $this->generateItems();
+    }
+
     function generateItems() {
 
 //$blueticket = new blueticket_forms();
@@ -309,7 +351,7 @@ $("#dialog").dialog("close");
 
         echo '
 <div id="dialog" title="Dialog Form" style="width:600px">
-<form action="" method="post" id="count_form">
+<form action="" method="post" id="count_form" autocomplete="off">
 <label>' . $this->getTranslatedText("Count") . ':</label>
 <input id="cnt" name="cnt" type="text">
 <label>' . $this->getTranslatedText("Price") . ':</label>
@@ -336,6 +378,9 @@ $("#dialog").dialog("close");
         echo '<a href="?report=print_items_qr" class="btn btn-primary" style="width:150px; height:30px; margin-top:10px; margin-left:10px">' . $this->getTranslatedText('Tlač štítkov QR') . '</a>';
         echo '<a href="?report=print_shipment" class="btn btn-primary" style="width:150px; height:30px; margin-top:10px; margin-left:10px">' . $this->getTranslatedText('Tlač výdajky') . '</a>';
         echo '<a href="?report=print_purchase" class="btn btn-primary" style="width:150px; height:30px; margin-top:10px; margin-left:10px">' . $this->getTranslatedText('Tlač príjemky') . '</a>';
+        echo '<a href="?report=print_shipment_cash" class="btn btn-primary" style="width:150px; height:30px; margin-top:10px; margin-left:10px">' . $this->getTranslatedText('Tlač výdajky + kasa') . '</a>';
+        echo '<a href="?report=print_purchase_cash" class="btn btn-primary" style="width:150px; height:30px; margin-top:10px; margin-left:10px">' . $this->getTranslatedText('Tlač príjemky + kasa') . '</a>';
+        echo '<a href="?report=unset_all" class="btn btn-primary" style="width:150px; height:30px; margin-top:10px; margin-left:10px">' . $this->getTranslatedText('Vyčistit') . '</a>';
 
         $blueticket->table('items'); //nazov tabulky v databaze
         $blueticket->order_by('Name', 'ASC');
@@ -556,4 +601,5 @@ $("#dialog").dialog("close");
 
         return $blueticket->render();
     }
+
 }

@@ -15,11 +15,19 @@ if (isset($_GET['report'])) {
             break;
         case 'print_purchase':
             $inv = new InvoicePDF();
-            echo $inv->CreateInvoice(true);
+            echo $inv->CreateInvoice(TRUE);
             break;
         case 'print_shipment':
             $inv = new InvoicePDF();
             echo $inv->CreateInvoice();
+            break;
+        case 'print_shipment_cash':
+            $inv = new InvoicePDF();
+            echo $inv->CreateInvoice(FALSE, TRUE);
+            break;
+        case 'print_purchase_cash':
+            $inv = new InvoicePDF();
+            echo $inv->CreateInvoice(TRUE, TRUE);
             break;
     }
 }
@@ -133,6 +141,9 @@ if (isset($_GET['report'])) {
                         break;
                     case 'partners':
                         echo $bt->generatePartners();
+                        break;
+                    case 'unset_all':
+                        echo $bt->unset_all();
                         break;
                 }
             } else {
