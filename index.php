@@ -152,20 +152,29 @@ if (isset($_GET['report'])) {
             ?>
         </div>
         <script type="text/javascript">
-            jQuery(document).on("ready blueticket_formsafterrequest", function() {
+            jQuery(document).on("ready blueticket_formsafterrequest", function () {
                 $("#name").autocomplete({
-                    source: function(request, response) {
+                    source: function (request, response) {
                         jQuery.ajax({
-                        url: "ajax_response.php?name=" + $("#name").val(),
-                                success: function(result) {
-                                    var availableTags = [];
-                                    availableTags = eval(result);
-                                    response(availableTags);
-                                }
-                            });
+                            url: "ajax_response.php?name=" + $("#name").val(),
+                            success: function (result) {
+                                var availableTags = [];
+                                availableTags = eval(result);
+                                response(availableTags);
+                            }
+                        });
                     },
+//                    select: function (event, ui) {
+//                        $("#name").val(ui[0]);
+//                        $("#regnum").val(ui[1]);
+//        $( "#project-description" ).html( ui.item.desc );
+//        $( "#project-icon" ).attr( "src", "images/" + ui.item.icon );
+//                    },
                     minLength: 3
                 });
+//                }).autocomplete("instance")._renderItem = function (ul, item) {
+//                    return $("<li>").append("<a>" + item.Name + "<br>" + item.RegistrationNumber + "</a>").appendTo(ul);
+//                };
             });
         </script>
     </body>

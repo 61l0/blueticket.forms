@@ -401,6 +401,7 @@ $("#dialog").dialog("close");
         $blueticket->label('Barcode', $this->getTranslatedText('Barcode'));
 
         $blueticket->set_attr('Name', array('id' => 'name'));
+        $blueticket->set_attr('Barcode', array('id' => 'regnum'));
 
         $blueticket->column_pattern('Barcode', '<img style="width:90px; height:90px" src="inc/qrcode.php?code={RegistrationNumber}"/>');
 

@@ -11,6 +11,7 @@ require_once './forms/blueticket_forms.php';
 //$mydb = new blueticket_forms_db();
 $mydb = blueticket_forms_db::get_instance();
 
+$name = "";
 $name = $_REQUEST['name'];
 
 $name = explode(" ", $name);
@@ -19,13 +20,12 @@ $filter = "";
 
 $i = 0;
 
-foreach ($name as $item)
-{
-    if($i==0)
-        $filter .= " Name LIKE '%$item%'";
+foreach ($name as $item) {
+    if ($i == 0)
+        $filter .= " (Name LIKE '%$item%' OR RegistrationNumber LIKE '%$item%')";
     else
-        $filter .= " AND Name LIKE '%$item%'";
-    
+        $filter .= " AND (Name LIKE '%$item%' OR RegistrationNumber LIKE '%$item%')";
+
     $i++;
 }
 
@@ -40,7 +40,7 @@ foreach ($mydb->result() as $row) {
 //        $return .= '["' . $row['Name'] . '"';
 //    else
 //        $return .= ',"' . $row['Name'] . '"';
-    array_push($return, $row['Name']);
+    array_push($return, $row["RegistrationNumber"] . '|' . $row['Name'] . ' [' . number_format($row['Qty'], 2) . ']');
     $i++;
 }
 
