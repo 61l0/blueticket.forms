@@ -160,9 +160,19 @@ if (isset($_GET['report'])) {
                             success: function (result) {
                                 var availableTags = [];
                                 availableTags = eval(result);
-                                response(availableTags);
+                                response($.map(availableTags, function (item) {
+                                    return {label : item.Name,
+                                        regnum : item.RegNum,
+                                        price : item.Price
+                                    };
+                                }));
                             }
                         });
+                    },
+                    select: function (event, ui) {
+                        //alert(ui.item.label);
+                        $("#regnum").val(ui.item.regnum);
+                        $("#plu").val(ui.item.price);
                     },
 //                    select: function (event, ui) {
 //                        $("#name").val(ui[0]);
@@ -173,7 +183,7 @@ if (isset($_GET['report'])) {
                     minLength: 3
                 });
 //                }).autocomplete("instance")._renderItem = function (ul, item) {
-//                    return $("<li>").append("<a>" + item.Name + "<br>" + item.RegistrationNumber + "</a>").appendTo(ul);
+//                    return $("<li>").append("<a>" + item.Name + "</a>").appendTo(ul);
 //                };
             });
         </script>

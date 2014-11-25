@@ -402,6 +402,8 @@ $("#dialog").dialog("close");
 
         $blueticket->set_attr('Name', array('id' => 'name'));
         $blueticket->set_attr('Barcode', array('id' => 'regnum'));
+        $blueticket->set_attr('Price', array('id' => 'price'));
+        $blueticket->set_attr('PLU', array('id' => 'plu'));
 
         $blueticket->column_pattern('Barcode', '<img style="width:90px; height:90px" src="inc/qrcode.php?code={RegistrationNumber}"/>');
 

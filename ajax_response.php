@@ -40,7 +40,7 @@ foreach ($mydb->result() as $row) {
 //        $return .= '["' . $row['Name'] . '"';
 //    else
 //        $return .= ',"' . $row['Name'] . '"';
-    array_push($return, $row["RegistrationNumber"] . '|' . $row['Name'] . ' [' . number_format($row['Qty'], 2) . ']');
+    array_push($return, array("Name" => $row["RegistrationNumber"] . '|' . $row['Name'] . ' [' . number_format($row['Qty'], 2) . ']', "RegNum" => $row['RegistrationNumber'], "Price" => $row['Price']));
     $i++;
 }
 
