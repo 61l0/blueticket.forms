@@ -142,9 +142,8 @@ class InvoicePDF extends TCPDF {
 
 //Close and output PDF document
             $pdf->Output('invoice.pdf', 'D');
-            
-            if($par_write)
-            {
+
+            if ($par_write) {
                 $bt->unset_all();
             }
         } else {
@@ -306,7 +305,7 @@ class blueticket_objects {
         unset($_SESSION['print_items']);
         unset($_SESSION['selected_items']);
         unset($_SESSION['selected_partner']);
-        
+
         return $this->generateItems();
     }
 
@@ -400,6 +399,8 @@ $("#dialog").dialog("close");
         $blueticket->label('TaxID', $this->getTranslatedText('TaxID'));
         $blueticket->label('GroupID', $this->getTranslatedText('GroupID'));
         $blueticket->label('Barcode', $this->getTranslatedText('Barcode'));
+
+        $blueticket->set_attr('Name', array('id' => 'name'));
 
         $blueticket->column_pattern('Barcode', '<img style="width:90px; height:90px" src="inc/qrcode.php?code={RegistrationNumber}"/>');
 

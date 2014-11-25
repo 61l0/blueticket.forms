@@ -151,5 +151,22 @@ if (isset($_GET['report'])) {
             }
             ?>
         </div>
+        <script type="text/javascript">
+            jQuery(document).on("ready blueticket_formsafterrequest", function() {
+                $("#name").autocomplete({
+                    source: function(request, response) {
+                        jQuery.ajax({
+                        url: "ajax_response.php?name=" + $("#name").val(),
+                                success: function(result) {
+                                    var availableTags = [];
+                                    availableTags = eval(result);
+                                    response(availableTags);
+                                }
+                            });
+                    },
+                    minLength: 3
+                });
+            });
+        </script>
     </body>
 </html>
