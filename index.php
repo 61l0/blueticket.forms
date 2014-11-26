@@ -152,27 +152,62 @@ if (isset($_GET['report'])) {
             ?>
         </div>
         <script type="text/javascript">
-            jQuery(document).on("ready blueticket_formsafterrequest", function () {
+            jQuery(document).on("ready blueticket_formsafterrequest", function() {
                 $("#name").autocomplete({
-                    source: function (request, response) {
+                    source: function(request, response) {
                         jQuery.ajax({
                             url: "ajax_response.php?name=" + $("#name").val(),
-                            success: function (result) {
+                            success: function(result) {
                                 var availableTags = [];
                                 availableTags = eval(result);
-                                response($.map(availableTags, function (item) {
-                                    return {label : item.Name,
-                                        regnum : item.RegNum,
-                                        price : item.Price
+                                response($.map(availableTags, function(item) {
+                                    return {label: item.Name,
+                                        regnum: item.RegNum,
+                                        price: item.Price
                                     };
                                 }));
                             }
                         });
                     },
-                    select: function (event, ui) {
+                    select: function(event, ui) {
                         //alert(ui.item.label);
                         $("#regnum").val(ui.item.regnum);
                         $("#plu").val(ui.item.price);
+                    },
+//                    select: function (event, ui) {
+//                        $("#name").val(ui[0]);
+//                        $("#regnum").val(ui[1]);
+//        $( "#project-description" ).html( ui.item.desc );
+//        $( "#project-icon" ).attr( "src", "images/" + ui.item.icon );
+//                    },
+                    minLength: 3
+                });
+//                }).autocomplete("instance")._renderItem = function (ul, item) {
+//                    return $("<li>").append("<a>" + item.Name + "</a>").appendTo(ul);
+//                };
+                $("#customerid").autocomplete({
+                    source: function(request, response) {
+                        jQuery.ajax({
+                            url: "ajax_response_partner.php?name=" + $("#customerid").val(),
+                            success: function(result) {
+                                var availableTags = [];
+                                availableTags = eval(result);
+                                response($.map(availableTags, function(item) {
+                                    return {label: item.Name,
+                                        value: item.ID,
+                                        description: item.Description
+                                    };
+                                }));
+                            }
+                        });
+                    },
+                    select: function(event, ui) {
+                        //alert(ui.item.label);
+                        var find = '<br />';
+                        var re = new RegExp(find, 'g');
+
+                        str = ui.item.description.replace(re, '\r\n');
+                        $("#customerdesc").val(str);
                     },
 //                    select: function (event, ui) {
 //                        $("#name").val(ui[0]);
