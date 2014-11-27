@@ -20,3 +20,12 @@ function before_items_insert_callback($row_data, $primary) {
     
     $row_data->set('items.RegistrationNumber', $myrow['RegNum']);
 }
+
+function before_document_create_callback($row_data, $xcrud) {
+    if(isset($_GET['type']))
+        $type = $_GET['type'];
+    else
+        $type = 4;
+    
+    $row_data['invoices.PaymentTypeID']=$type;
+}

@@ -6,7 +6,7 @@
     width: auto;
     display: table !important;
     margin-bottom: 3px;
- /*   table-layout: fixed;*/
+    /*   table-layout: fixed;*/
 }
 .blueticket_forms-list th, .blueticket_forms-list td{
     /*white-space:nowrap;*/
@@ -162,6 +162,7 @@ input.blueticket_forms-upload{
     width: 10%;
     margin: 0 5px 0 0;
     vertical-align: top;
+    border: 1px solid #ccc;
 }
 
 .blueticket_forms .btn-group{
@@ -277,6 +278,11 @@ a.blueticket_forms_modal{
     margin: 8px;
     cursor: pointer;
 }
+
+.blueticket_forms input[type="text"],.blueticket_forms input[type="password"]{
+    border: 1px solid #ccc;
+}
+
 h2{
     border-bottom: 1px solid #ddd;
 }

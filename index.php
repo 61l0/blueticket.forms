@@ -134,13 +134,24 @@ if (isset($_GET['report'])) {
                         echo $bt->generateItems();
                         break;
                     case 'stats':
-                        echo $bt->generateInvoices();
+                        if(isset($_GET['type']))
+                        {
+                            $type = $_GET['type'];
+                        }
+                        else
+                        {
+                            $type = 4;
+                        }
+                        echo $bt->generateTypesDocuments();
                         break;
                     case 'trans':
                         echo $bt->generateTranslate();
                         break;
                     case 'partners':
                         echo $bt->generatePartners();
+                        break;
+                    case 'doctypes':
+                        echo $bt->generateTypes();
                         break;
                     case 'unset_all':
                         echo $bt->unset_all();
