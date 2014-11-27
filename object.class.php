@@ -565,7 +565,7 @@ $("#dialog").dialog("close");
 
         $blueticket = $blueticket_types->nested_table($this->getTranslatedText('Invoices'), 'ID', 'invoices', 'TypeID');
 //        $blueticket->table_name($this->getTranslatedText('Invoices'));
-//        $blueticket->default_tab($this->getTranslatedText('Invoices'));
+        $blueticket->default_tab($this->getTranslatedText('Invoices'));
 
         $blueticket->columns('Partner, InvoiceDateTime, InvoiceNumber, UserName, InvoiceTotal'); //nastavenie stlpcov tabulky, ktore sa zobrazia v tabulkovom zobrazeni
         $blueticket->fields('CustomerID, CustomerDescription, InvoiceDateTime, PaymentTypeID'); //nastavenie stlpcov tabulky, ktore sa zobrazia v tabulkovom zobrazeni
