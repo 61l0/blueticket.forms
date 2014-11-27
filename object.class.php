@@ -15,6 +15,196 @@ require_once("forms/blueticket_forms.php");
 require_once ('tcpdf/tcpdf.php');
 require_once ('tcpdf/tcpdf_barcodes_2d.php');
 
+require_once 'php_socket.class.php';
+
+class printDocument {
+
+    function getSeo($text) {
+        $utf8table = array("\xc3\xa1" => "a", "\xc3\xa4" => "a", "\xc4\x8d" => "c", "\xc4\x8f" => "d", "\xc3\xa9" => "e", "\xc4\x9b" => "e", "\xc3\xad" => "i", "\xc4\xbe" => "l", "\xc4\xba" => "l", "\xc5\x88" => "n", "\xc3\xb3" => "o", "\xc3\xb6" => "o", "\xc5\x91" => "o", "\xc3\xb4" => "o", "\xc5\x99" => "r", "\xc5\x95" => "r", "\xc5\xa1" => "s", "\xc5\xa5" => "t", "\xc3\xba" => "u", "\xc5\xaf" => "u", "\xc3\xbc" => "u", "\xc5\xb1" => "u", "\xc3\xbd" => "y", "\xc5\xbe" => "z", "\xc3\x81" => "A", "\xc3\x84" => "A", "\xc4\x8c" => "C", "\xc4\x8e" => "D", "\xc3\x89" => "E", "\xc4\x9a" => "E", "\xc3\x8d" => "I", "\xc4\xbd" => "L", "\xc4\xb9" => "L", "\xc5\x87" => "N", "\xc3\x93" => "O", "\xc3\x96" => "O", "\xc5\x90" => "O", "\xc3\x94" => "O", "\xc5\x98" => "R", "\xc5\x94" => "R", "\xc5\xa0" => "S", "\xc5\xa4" => "T", "\xc3\x9a" => "U", "\xc5\xae" => "U", "\xc3\x9c" => "U", "\xc5\xb0" => "U", "\xc3\x9d" => "Y", "\xc5\xbd" => "Z");
+        $text = strtr($text, $utf8table);
+        return $text;
+    }
+
+    function prepareLine($parLeftStr, $parRightStr, $parLength = 40) {
+        $parLeftStr = $this->getSeo($parLeftStr);
+        $parRightStr = $this->getSeo($parRightStr);
+
+        if (strlen($parLeftStr) >= ($parLength - strlen($parRightStr))) {
+            $parLeftStr = substr($parLeftStr, 0, ($parLength - strlen($parRightStr)) - 2);
+        }
+
+        $Lng = $parLength - strlen($parRightStr) - strlen($parLeftStr);
+
+        $tempSpace = "";
+
+        for ($i = 0; $i < $Lng; $i++)
+            $tempSpace .= " ";
+
+        $myString = chr(27) . "!" . chr(0) . "\n" . $parLeftStr . $tempSpace . $parRightStr;
+
+        return $myString;
+    }
+
+    function prepareHighLine($parLeftStr, $parRightStr, $parLength = 48) {
+        $parLeftStr = $this->getSeo($parLeftStr);
+        $parRightStr = $this->getSeo($parRightStr);
+
+        if (strlen($parLeftStr) >= ($parLength - strlen($parRightStr))) {
+            $parLeftStr = substr($parLeftStr, 0, ($parLength - strlen($parRightStr)) - 2);
+        }
+
+        $Lng = $parLength - strlen($parRightStr) - strlen($parLeftStr);
+
+        $tempSpace = "";
+
+        for ($i = 0; $i < $Lng; $i++)
+            $tempSpace .= " ";
+
+        $myString = "\n" . chr(27) . "!" . chr(17) . $parLeftStr . $tempSpace . $parRightStr . chr(27) . "!" . chr(0);
+
+        return $myString;
+    }
+
+    function prepareHeader($par_DocumentNumber = "") {
+
+        $header = "\n"; //chr(27) . chr(116) . chr(18);
+//for($i=0;$i<255;$i++)
+//{
+//    $header .= chr(27) . "!" . chr($i) . "$i - ABC\n";
+//}
+        $blueticket = blueticket_forms_db::get_instance();
+        $blueticket->query("SELECT * FROM invoices WHERE InvoiceNumber='$par_DocumentNumber'");
+        $mydocument = $blueticket->row();
+
+        $typeid = $mydocument['TypeID'];
+        $customer = $mydocument['CustomerDescription'];
+        $deliveryid = $mydocument['DeliveryTypeID'];
+        $paymentid = $mydocument['PaymentTypeID'];
+        $date = date('d.m.Y', strtotime($mydocument['InvoiceDateTime']));
+
+        $blueticket->query("SELECT * FROM document_types WHERE ID='$typeid'");
+        $mytype = $blueticket->row();
+
+        $docname = $mytype['Description'];
+
+        $blueticket->query("SELECT * FROM delivery_types WHERE ID='$deliveryid'");
+        $mydelivery = $blueticket->row();
+
+        $delivery = $mydelivery['Description'];
+
+        $blueticket->query("SELECT * FROM payment_types WHERE ID='$paymentid'");
+        $mypayment = $blueticket->row();
+        $payment = $mypayment['PaymentTypeName'];
+
+        $header .= $this->prepareLine("", "========================================");
+        $header .= $this->prepareHighLine("$docname cislo:", $par_DocumentNumber);
+        $header .= $this->prepareLine("", "========================================");
+        $header .= $this->prepareLine("Dodavatel:", "");
+        $header .= $this->prepareLine("FUNSTAR s.r.o.", "");
+        $header .= $this->prepareLine("Tovarnicka 14", "");
+        $header .= $this->prepareLine("955 01", "Topolcany");
+        $header .= $this->prepareLine("ICO:", "45 416 761");
+        $header .= $this->prepareLine("DIC/IC-DPH:", "SK2022976934");
+        $header .= $this->prepareLine("IBAN:", "SK8711000000002923832787");
+        $header .= $this->prepareLine("SWIFT:", "TATRSKBX");
+//$header .=  prepareLine(" ", " ");
+        $header .= $this->prepareLine("", "========================================");
+        $header .= $this->prepareLine("Odberatel:", "");
+        $header .= $this->getSeo("\n" . $customer);
+//        if ($par_Desk != '-') {
+//            $result = getQuery("SELECT * FROM partners WHERE ID='$par_Desk'");
+//            $row = mysql_fetch_assoc($result);
+//            mysql_free_result($result);
+//            $header .= prepareLine("Cislo zakaznika:", $par_Desk);
+//            $header .= prepareLine($row['Name'], "");
+//            $header .= prepareLine($row['Address'], "");
+//            $header .= prepareLine($row['ZIP'], $row['City']);
+//            $header .= prepareLine("ICO:", $row['PID']);
+//            $header .= prepareLine("DIC:", $row['VAT']);
+//            $header .= prepareLine("IC-DPH:", $row['VATID']);
+//        } else
+//            $header .= prepareLine("Cislo zakaznika:", $par_Desk);
+        $header .= $this->prepareLine("", "========================================");
+        $header .= $this->prepareLine("Datum vystavenia:", $date);
+        $header .= $this->prepareLine("Datum dodania:", $date);
+        $header .= $this->prepareLine("", "========================================");
+        $header .= $this->prepareLine("Forma uhrady:", $payment);
+        $header .= $this->prepareLine("Sposob dodania:", $delivery);
+        $header .= $this->prepareLine("", "========================================");
+//$header .=  prepareLine(" ", " ");
+
+        return $header;
+    }
+
+    function cut() {
+        return chr(29) . chr(86) . chr(1);
+    }
+
+    function prepareFooter($parTotal, $parTotalWOTax = 0) {
+        $parTotalWOTax = number_format($parTotal / 1.2, 2);
+//$footer =  prepareLine(" ", " ");
+        $footer .= $this->prepareLine("", "========================================");
+        $footer .= $this->prepareLine("Spolu bez DPH:", number_format($parTotalWOTax, 2) . " EUR");
+        $footer .= $this->prepareLine("DPH 20%:", number_format($parTotal - $parTotalWOTax, 2) . " EUR");
+        $footer .= $this->prepareLine("", "========================================");
+//$footer .=  prepareLine(" ", " ");
+        $footer .= $this->prepareHighLine("Celkom s DPH:", number_format($parTotal, 2) . " EUR");
+//$footer .=  prepareLine(" ", " ");
+        $footer .= $this->prepareLine("", "========================================");
+        $footer .= $this->prepareLine(" ", " ");
+        $footer .= $this->prepareLine(" ", " ");
+        $footer .= $this->prepareLine(" ", " ");
+        $footer .= $this->prepareLine(" ", " ");
+        $footer .= $this->prepareLine(" ", " ");
+        $footer .= $this->prepareLine(" ", " ");
+        $footer .= "\n";
+        $footer .= $this->cut();
+        return $footer;
+    }
+
+    function getPrinter($par_DocumentNumber) {
+        $blueticket = blueticket_forms_db::get_instance();
+        $blueticket->query("SELECT * FROM invoices WHERE InvoiceNumber='$par_DocumentNumber'");
+        $mydocument = $blueticket->row();
+
+        $typeid = $mydocument['TypeID'];
+
+        $blueticket->query("SELECT * FROM document_types WHERE ID='$typeid'");
+        $mytype = $blueticket->row();
+
+        return $mytype['PrinterAddress'];
+    }
+
+    function print_document($par_DocumentNumber) {
+        $serialorder = new phpSerial();
+        $serialorder->deviceSet($this->getPrinter($par_DocumentNumber));
+
+//        $blueticket = new blueticket_forms_db();
+        $blueticket = blueticket_forms_db::get_instance();
+        $blueticket->query("SELECT * FROM invoices_items WHERE InvoiceNumber='$par_DocumentNumber'");
+        $mydocumentitems = $blueticket->result();
+        $total = 0;
+        $total_wo_tax = 0;
+
+        $message = $this->prepareHeader($par_DocumentNumber);
+
+        foreach ($mydocumentitems as $row) {
+            $message .= $this->prepareLine($row['Name'], "");
+            $message .= $this->prepareLine("DPH %:" . number_format($row['TAXPercent'], 2), "Mnoz.:" . number_format($row['Quantity'], 2) . " ks x JC:" . number_format($row['Price'], 2));
+            $subtotal = number_format($row['Price'] * $row['Quantity'], 2);
+            $total = $subtotal + $total;
+            $total_wo_tax = $total_wo_tax + ($subtotal / (1 + ($row['TaxPercent'] / 100)));
+            $message .= $this->prepareLine("Spolu za polozku:", number_format($subtotal, 2));
+            //getQuery("DELETE FROM print_kitchen WHERE ID=" . $row["ID"]);
+        }
+
+        $message .= $this->prepareFooter($total, $total_wo_tax);
+
+        $serialorder->sendMessage($message);
+    }
+
+}
+
 class InvoicePDF extends TCPDF {
 
     public function Header() {
@@ -131,7 +321,7 @@ class InvoicePDF extends TCPDF {
 
 //footer
 //
-            // output the total row
+// output the total row
             $pdf->CreateTextBox($bt->getTranslatedText('Total'), 5, $currY + 5, 135, 10, 10, 'B', 'R');
             $pdf->CreateTextBox(number_format($total, 2, '.', ' ') . ' €', 140, $currY + 5, 30, 10, 10, 'B', 'R');
 
@@ -401,11 +591,6 @@ $("#dialog").dialog("close");
         $blueticket->label('GroupID', $this->getTranslatedText('GroupID'));
         $blueticket->label('Barcode', $this->getTranslatedText('Barcode'));
 
-        $blueticket->set_attr('Name', array('id' => 'name'));
-        $blueticket->set_attr('Barcode', array('id' => 'regnum'));
-        $blueticket->set_attr('Price', array('id' => 'price'));
-        $blueticket->set_attr('PLU', array('id' => 'plu'));
-
         $blueticket->column_pattern('Barcode', '<img style="width:90px; height:90px" src="inc/qrcode.php?code={RegistrationNumber}"/>');
 
         $blueticket->relation('UnitID', 'units', 'ID', 'Name');
@@ -487,7 +672,7 @@ $("#dialog").dialog("close");
                 }).done(function () {
                 alert("Partner ID: " + par_id + " bol úspešne zvolený");
 });
-};
+}
 </script>';
 
         $blueticket->table('partners');
@@ -539,28 +724,38 @@ $("#dialog").dialog("close");
         $blueticket_types->table_name($this->getTranslatedText('DocumentTypes'));
         $blueticket_types->default_tab($this->getTranslatedText('DocumentTypes'));
 
-        $blueticket_types->columns('Description, PrinterAddress'); //nastavenie stlpcov tabulky, ktore sa zobrazia v tabulkovom zobrazeni
-        $blueticket_types->fields('Description, PrinterAddress'); //nastavenie stlpcov tabulky, ktore sa zobrazia v tabulkovom zobrazeni
-        
+        $blueticket_types->columns('Description, Counting, PrinterAddress'); //nastavenie stlpcov tabulky, ktore sa zobrazia v tabulkovom zobrazeni
+        $blueticket_types->fields('Description, Counting, PrinterAddress'); //nastavenie stlpcov tabulky, ktore sa zobrazia v tabulkovom zobrazeni
+
         $blueticket_types->label('Description', $this->getTranslatedText('Description'));
+        $blueticket_types->label('Counting', $this->getTranslatedText('Counting'));
         $blueticket_types->label('PrinterAddress', $this->getTranslatedText('PrinterAddress'));
-        
+
         return $blueticket_types->render();
     }
 
     function generateTypesDocuments() {
+        echo '<script type="text/javascript">
+            function print_doc(par_documentno) {
+                $.ajax({
+                    url: "printdoc.php?document=" + par_documentno,
+                }).done(function () {
+                alert("Doklad " + par_documentno + " bol odoslany do tlaciarne");
+});
+}
+</script>';
         $blueticket_types = blueticket_forms::get_instance();
-        
+
         $blueticket_types->table('document_types');
         $blueticket_types->table_name($this->getTranslatedText('DocumentTypes'));
         $blueticket_types->default_tab($this->getTranslatedText('DocumentTypes'));
 
         $blueticket_types->columns('Description, PrinterAddress'); //nastavenie stlpcov tabulky, ktore sa zobrazia v tabulkovom zobrazeni
         $blueticket_types->fields('Description, PrinterAddress'); //nastavenie stlpcov tabulky, ktore sa zobrazia v tabulkovom zobrazeni
-        
+
         $blueticket_types->label('Description', $this->getTranslatedText('Description'));
         $blueticket_types->label('PrinterAddress', $this->getTranslatedText('PrinterAddress'));
-        
+
         $blueticket_types->disabled('Description,PrinterAddress');
 
         $blueticket = $blueticket_types->nested_table($this->getTranslatedText('Invoices'), 'ID', 'invoices', 'TypeID');
@@ -568,24 +763,28 @@ $("#dialog").dialog("close");
         $blueticket->default_tab($this->getTranslatedText('Invoices'));
 
         $blueticket->columns('Partner, InvoiceDateTime, InvoiceNumber, UserName, InvoiceTotal'); //nastavenie stlpcov tabulky, ktore sa zobrazia v tabulkovom zobrazeni
-        $blueticket->fields('CustomerID, CustomerDescription, InvoiceDateTime, PaymentTypeID'); //nastavenie stlpcov tabulky, ktore sa zobrazia v tabulkovom zobrazeni
+        $blueticket->fields('CustomerID, CustomerDescription, InvoiceDateTime, PaymentTypeID, DeliveryTypeID'); //nastavenie stlpcov tabulky, ktore sa zobrazia v tabulkovom zobrazeni
         $blueticket->label('InvoiceDateTime', $this->getTranslatedText('InvoiceDateTime'));
         $blueticket->label('InvoiceNumber', $this->getTranslatedText('InvoiceNumber'));
         $blueticket->label('UserID', $this->getTranslatedText('UserID'));
         $blueticket->label('InvoiceTotal', $this->getTranslatedText('InvoiceTotal'));
-        //$blueticket->label('InvoiceTotalToday', $this->getTranslatedText('InvoiceTotalToday'));
+//$blueticket->label('InvoiceTotalToday', $this->getTranslatedText('InvoiceTotalToday'));
         $blueticket->label('Partner', $this->getTranslatedText('Partner'));
         $blueticket->label('CustomerID', $this->getTranslatedText('CustomerID'));
         $blueticket->label('CustomerDescription', $this->getTranslatedText('CustomerDescription'));
         $blueticket->label('PaymentTypeID', $this->getTranslatedText('PaymentTypeID'));
+        $blueticket->label('DeliveryTypeID', $this->getTranslatedText('DeliveryTypeID'));
 
         $blueticket->relation('PaymentTypeID', 'payment_types', 'ID', 'PaymentTypeName');
+        $blueticket->relation('DeliveryTypeID', 'delivery_types', 'ID', 'Description');
+
+        $blueticket->button("javascript:print_doc('{InvoiceNumber}');", $this->getTranslatedText('Print'), 'glyphicon glyphicon-print');
 
         $blueticket->subselect('UserName', 'SELECT Username FROM users WHERE ID={UserID}');
         $blueticket->subselect('Partner', 'SELECT Name FROM partners WHERE ID=(SELECT MAX(CartNr) FROM invoices_items WHERE invoices_items.InvoiceNumber={InvoiceNumber})');
 
         $blueticket->subselect('InvoiceTotal', 'SELECT SUM(Price*Quantity) as InvoiceTotal FROM invoices_items WHERE InvoiceNumber={InvoiceNumber}');
-        //$blueticket->subselect('InvoiceTotalToday', 'SELECT SUM(Price*Quantity) as InvoiceTotal FROM invoices_items WHERE InvoiceNumber={InvoiceNumber}');
+//$blueticket->subselect('InvoiceTotalToday', 'SELECT SUM(Price*Quantity) as InvoiceTotal FROM invoices_items WHERE InvoiceNumber={InvoiceNumber}');
         $blueticket->order_by('InvoiceDateTime', 'DESC');
 
         $blueticket->change_type('InvoiceTotal', 'price', '0');
@@ -593,14 +792,23 @@ $("#dialog").dialog("close");
         $blueticket->sum('InvoiceTotal');
 
         $blueticket->set_attr('CustomerID', array('id' => 'customerid'));
+
         $blueticket->no_editor('CustomerDescription');
         $blueticket->change_type('CustomerDescription', 'textarea', '', array('style' => 'height:250px'));
         $blueticket->set_attr('CustomerDescription', array('id' => 'customerdesc'));
-        //$blueticket->before_create('before_document_create_callback', 'blueticket.pos.functions.php');
-
+        $blueticket->before_insert('before_document_insert_callback', 'blueticket.pos.functions.php');
 // invoices items month nested table
         $bt_item_invoice = $blueticket->nested_table($this->getTranslatedText('InvoicesItems'), 'InvoiceNumber', 'invoices_items', 'InvoiceNumber');
         $bt_item_invoice->columns('InvoiceNumber, Barcode, Name, CartNr, Quantity, Price, SubTotal');
+        $bt_item_invoice->fields('InvoiceNumber, Barcode, Name, CartNr, Quantity, Price, TAXPercent, Unit, SubTotal');
+
+        $bt_item_invoice->set_attr('Name', array('id' => 'name'));
+        $bt_item_invoice->set_attr('Barcode', array('id' => 'regnum'));
+        $bt_item_invoice->set_attr('TAXPercent', array('id' => 'taxpercent'));
+        $bt_item_invoice->set_attr('Unit', array('id' => 'unit'));
+
+        $bt_item_invoice->disabled('InvoiceNumber');
+
         $bt_item_invoice->subselect('SubTotal', '{Price}*{Quantity}');
 
         $bt_item_invoice->label('InvoiceNumber', $this->getTranslatedText('InvoiceNumber'));
@@ -610,8 +818,12 @@ $("#dialog").dialog("close");
         $bt_item_invoice->label('Quantity', $this->getTranslatedText('Quantity'));
         $bt_item_invoice->label('Price', $this->getTranslatedText('Price'));
         $bt_item_invoice->label('SubTotal', $this->getTranslatedText('SubTotal'));
+        $bt_item_invoice->label('TAXPercent', $this->getTranslatedText('TAXPercent'));
+        $bt_item_invoice->label('Unit', $this->getTranslatedText('Unit'));
         $bt_item_invoice->column_class('Quantity,Price,SubTotal', 'align-right');
         $bt_item_invoice->change_type('Quantity,Price,SubTotal', 'price', '0');
+
+        $bt_item_invoice->set_attr('Price', array('id' => 'price'));
 
         $bt_item_invoice->sum('SubTotal');
 
@@ -646,7 +858,7 @@ $("#dialog").dialog("close");
         $blueticket->label('InvoiceNumber', $this->getTranslatedText('InvoiceNumber'));
         $blueticket->label('UserID', $this->getTranslatedText('UserID'));
         $blueticket->label('InvoiceTotal', $this->getTranslatedText('InvoiceTotal'));
-        //$blueticket->label('InvoiceTotalToday', $this->getTranslatedText('InvoiceTotalToday'));
+//$blueticket->label('InvoiceTotalToday', $this->getTranslatedText('InvoiceTotalToday'));
         $blueticket->label('Partner', $this->getTranslatedText('Partner'));
         $blueticket->label('CustomerID', $this->getTranslatedText('CustomerID'));
         $blueticket->label('CustomerDescription', $this->getTranslatedText('CustomerDescription'));
@@ -655,7 +867,7 @@ $("#dialog").dialog("close");
         $blueticket->subselect('Partner', 'SELECT Name FROM partners WHERE ID=(SELECT MAX(CartNr) FROM invoices_items WHERE invoices_items.InvoiceNumber={InvoiceNumber})');
 
         $blueticket->subselect('InvoiceTotal', 'SELECT SUM(Price*Quantity) as InvoiceTotal FROM invoices_items WHERE InvoiceNumber={InvoiceNumber}');
-        //$blueticket->subselect('InvoiceTotalToday', 'SELECT SUM(Price*Quantity) as InvoiceTotal FROM invoices_items WHERE InvoiceNumber={InvoiceNumber}');
+//$blueticket->subselect('InvoiceTotalToday', 'SELECT SUM(Price*Quantity) as InvoiceTotal FROM invoices_items WHERE InvoiceNumber={InvoiceNumber}');
         $blueticket->order_by('InvoiceDateTime', 'DESC');
 
         $blueticket->change_type('InvoiceTotal', 'price', '0');

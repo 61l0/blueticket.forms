@@ -40,7 +40,18 @@ foreach ($mydb->result() as $row) {
 //        $return .= '["' . $row['Name'] . '"';
 //    else
 //        $return .= ',"' . $row['Name'] . '"';
-    array_push($return, array("Name" => $row["RegistrationNumber"] . '|' . $row['Name'] . ' [' . number_format($row['Qty'], 2) . ']', "RegNum" => $row['RegistrationNumber'], "Price" => $row['Price']));
+
+    $taxid = $row['TaxID'];
+    $unitid = $row['UnitID'];
+
+    $mydb->query("SELECT * FROM units WHERE ID='$unitid'");
+    $unitrow = $mydb->row();
+    $unit = $unitrow['Name'];
+    $mydb->query("SELECT * FROM taxes WHERE ID='$taxid'");
+    $taxrow = $mydb->row();
+    $tax = $taxrow['Value'];
+
+    array_push($return, array("Tax" => $tax, "Unit" => $unit, "Description" => $row["RegistrationNumber"] . '|' . $row['Name'] . ' [' . number_format($row['Qty'], 2) . ']', "Name" => $row['Name'], "RegNum" => $row['RegistrationNumber'], "Price" => $row['Price']));
     $i++;
 }
 

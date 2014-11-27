@@ -164,17 +164,21 @@ if (isset($_GET['report'])) {
         </div>
         <script type="text/javascript">
             jQuery(document).on("ready blueticket_formsafterrequest", function() {
-                $("#name").autocomplete({
+                $("#regnum").autocomplete({
                     source: function(request, response) {
                         jQuery.ajax({
-                            url: "ajax_response.php?name=" + $("#name").val(),
+                            url: "ajax_response.php?name=" + $("#regnum").val(),
                             success: function(result) {
                                 var availableTags = [];
                                 availableTags = eval(result);
                                 response($.map(availableTags, function(item) {
-                                    return {label: item.Name,
+                                    return {label: item.Description,
+                                        name: item.Name,
+                                        value: item.RegNum,
                                         regnum: item.RegNum,
-                                        price: item.Price
+                                        price: item.Price,
+                                        tax: item.Tax,
+                                        unit: item.Unit
                                     };
                                 }));
                             }
@@ -182,8 +186,11 @@ if (isset($_GET['report'])) {
                     },
                     select: function(event, ui) {
                         //alert(ui.item.label);
-                        $("#regnum").val(ui.item.regnum);
-                        $("#plu").val(ui.item.price);
+                        //$("#regnum").val(ui.item.regnum);
+                        $("#price").val(ui.item.price);
+                        $("#name").val(ui.item.name);
+                        $("#taxpercent").val(ui.item.tax);
+                        $("#unit").val(ui.item.unit);
                     },
 //                    select: function (event, ui) {
 //                        $("#name").val(ui[0]);
