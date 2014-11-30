@@ -566,10 +566,10 @@ $("#dialog").dialog("close");
 
         echo '<a href="?report=print_items_bc" class="btn btn-primary" style="width:150px; height:30px; margin-top:10px; margin-left:10px">' . $this->getTranslatedText('Tlač štítkov UPC') . '</a>';
         echo '<a href="?report=print_items_qr" class="btn btn-primary" style="width:150px; height:30px; margin-top:10px; margin-left:10px">' . $this->getTranslatedText('Tlač štítkov QR') . '</a>';
-        echo '<a href="?report=print_shipment" class="btn btn-primary" style="width:150px; height:30px; margin-top:10px; margin-left:10px">' . $this->getTranslatedText('Tlač výdajky') . '</a>';
-        echo '<a href="?report=print_purchase" class="btn btn-primary" style="width:150px; height:30px; margin-top:10px; margin-left:10px">' . $this->getTranslatedText('Tlač príjemky') . '</a>';
-        echo '<a href="?report=print_shipment_cash" class="btn btn-primary" style="width:150px; height:30px; margin-top:10px; margin-left:10px">' . $this->getTranslatedText('Tlač výdajky + kasa') . '</a>';
-        echo '<a href="?report=print_purchase_cash" class="btn btn-primary" style="width:150px; height:30px; margin-top:10px; margin-left:10px">' . $this->getTranslatedText('Tlač príjemky + kasa') . '</a>';
+//        echo '<a href="?report=print_shipment" class="btn btn-primary" style="width:150px; height:30px; margin-top:10px; margin-left:10px">' . $this->getTranslatedText('Tlač výdajky') . '</a>';
+//        echo '<a href="?report=print_purchase" class="btn btn-primary" style="width:150px; height:30px; margin-top:10px; margin-left:10px">' . $this->getTranslatedText('Tlač príjemky') . '</a>';
+//        echo '<a href="?report=print_shipment_cash" class="btn btn-primary" style="width:150px; height:30px; margin-top:10px; margin-left:10px">' . $this->getTranslatedText('Tlač výdajky + kasa') . '</a>';
+//        echo '<a href="?report=print_purchase_cash" class="btn btn-primary" style="width:150px; height:30px; margin-top:10px; margin-left:10px">' . $this->getTranslatedText('Tlač príjemky + kasa') . '</a>';
         echo '<a href="?report=unset_all" class="btn btn-primary" style="width:150px; height:30px; margin-top:10px; margin-left:10px">' . $this->getTranslatedText('Vyčistit') . '</a>';
 
         $blueticket->table('items'); //nazov tabulky v databaze
@@ -697,7 +697,7 @@ $("#dialog").dialog("close");
 
         $blueticket->button("javascript:click_partner('{ID}');", $this->getTranslatedText('Item labels'), 'glyphicon glyphicon-ok');
 
-        $bt_item_invoice_month = $blueticket->nested_table($this->getTranslatedText('InvoicesItemsMonth'), 'ID', 'invoices_items_month', 'CartNr');
+        $bt_item_invoice_month = $blueticket->nested_table($this->getTranslatedText('InvoicesItems'), 'ID', 'invoices_items', 'CartNr');
         $bt_item_invoice_month->columns('InvoiceDateTime, InvoiceNumber, Barcode, Name, CartNr, Quantity, Price, SubTotal');
         $bt_item_invoice_month->subselect('SubTotal', '{Price}*{Quantity}');
 
@@ -724,12 +724,13 @@ $("#dialog").dialog("close");
         $blueticket_types->table_name($this->getTranslatedText('DocumentTypes'));
         $blueticket_types->default_tab($this->getTranslatedText('DocumentTypes'));
 
-        $blueticket_types->columns('Description, Counting, PrinterAddress'); //nastavenie stlpcov tabulky, ktore sa zobrazia v tabulkovom zobrazeni
-        $blueticket_types->fields('Description, Counting, PrinterAddress'); //nastavenie stlpcov tabulky, ktore sa zobrazia v tabulkovom zobrazeni
+        $blueticket_types->columns('Description, Counting, PrinterAddress, WHSign'); //nastavenie stlpcov tabulky, ktore sa zobrazia v tabulkovom zobrazeni
+        $blueticket_types->fields('Description, Counting, PrinterAddress, WHSign'); //nastavenie stlpcov tabulky, ktore sa zobrazia v tabulkovom zobrazeni
 
         $blueticket_types->label('Description', $this->getTranslatedText('Description'));
         $blueticket_types->label('Counting', $this->getTranslatedText('Counting'));
         $blueticket_types->label('PrinterAddress', $this->getTranslatedText('PrinterAddress'));
+        $blueticket_types->label('WHSign', $this->getTranslatedText('WHSign'));
 
         return $blueticket_types->render();
     }
@@ -750,8 +751,8 @@ $("#dialog").dialog("close");
         $blueticket_types->table_name($this->getTranslatedText('DocumentTypes'));
         $blueticket_types->default_tab($this->getTranslatedText('DocumentTypes'));
 
-        $blueticket_types->columns('Description, PrinterAddress'); //nastavenie stlpcov tabulky, ktore sa zobrazia v tabulkovom zobrazeni
-        $blueticket_types->fields('Description, PrinterAddress'); //nastavenie stlpcov tabulky, ktore sa zobrazia v tabulkovom zobrazeni
+        $blueticket_types->columns('Description'); //, PrinterAddress'); //nastavenie stlpcov tabulky, ktore sa zobrazia v tabulkovom zobrazeni
+        $blueticket_types->fields('Description'); //, PrinterAddress'); //nastavenie stlpcov tabulky, ktore sa zobrazia v tabulkovom zobrazeni
 
         $blueticket_types->label('Description', $this->getTranslatedText('Description'));
         $blueticket_types->label('PrinterAddress', $this->getTranslatedText('PrinterAddress'));
@@ -763,7 +764,8 @@ $("#dialog").dialog("close");
         $blueticket->default_tab($this->getTranslatedText('Invoices'));
 
         $blueticket->columns('Partner, InvoiceDateTime, InvoiceNumber, UserName, InvoiceTotal'); //nastavenie stlpcov tabulky, ktore sa zobrazia v tabulkovom zobrazeni
-        $blueticket->fields('CustomerID, CustomerDescription, InvoiceDateTime, PaymentTypeID, DeliveryTypeID'); //nastavenie stlpcov tabulky, ktore sa zobrazia v tabulkovom zobrazeni
+        $blueticket->fields('Partner, TypeID, CustomerID, CustomerDescription, InvoiceDateTime, PaymentTypeID, DeliveryTypeID'); //nastavenie stlpcov tabulky, ktore sa zobrazia v tabulkovom zobrazeni
+        $blueticket->label('TypeID', $this->getTranslatedText('TypeID'));
         $blueticket->label('InvoiceDateTime', $this->getTranslatedText('InvoiceDateTime'));
         $blueticket->label('InvoiceNumber', $this->getTranslatedText('InvoiceNumber'));
         $blueticket->label('UserID', $this->getTranslatedText('UserID'));
@@ -775,13 +777,14 @@ $("#dialog").dialog("close");
         $blueticket->label('PaymentTypeID', $this->getTranslatedText('PaymentTypeID'));
         $blueticket->label('DeliveryTypeID', $this->getTranslatedText('DeliveryTypeID'));
 
+        $blueticket->relation('TypeID', 'document_types', 'ID', 'Description');
         $blueticket->relation('PaymentTypeID', 'payment_types', 'ID', 'PaymentTypeName');
         $blueticket->relation('DeliveryTypeID', 'delivery_types', 'ID', 'Description');
 
         $blueticket->button("javascript:print_doc('{InvoiceNumber}');", $this->getTranslatedText('Print'), 'glyphicon glyphicon-print');
 
         $blueticket->subselect('UserName', 'SELECT Username FROM users WHERE ID={UserID}');
-        $blueticket->subselect('Partner', 'SELECT Name FROM partners WHERE ID=(SELECT MAX(CartNr) FROM invoices_items WHERE invoices_items.InvoiceNumber={InvoiceNumber})');
+        $blueticket->subselect('Partner', "SELECT Name FROM partners WHERE partners.ID={CustomerID}");
 
         $blueticket->subselect('InvoiceTotal', 'SELECT SUM(Price*Quantity) as InvoiceTotal FROM invoices_items WHERE InvoiceNumber={InvoiceNumber}');
 //$blueticket->subselect('InvoiceTotalToday', 'SELECT SUM(Price*Quantity) as InvoiceTotal FROM invoices_items WHERE InvoiceNumber={InvoiceNumber}');
@@ -823,6 +826,8 @@ $("#dialog").dialog("close");
         $bt_item_invoice->column_class('Quantity,Price,SubTotal', 'align-right');
         $bt_item_invoice->change_type('Quantity,Price,SubTotal', 'price', '0');
 
+        $bt_item_invoice->before_insert('before_document_item_insert_callback', 'blueticket.pos.functions.php');
+        $bt_item_invoice->before_remove('before_document_item_delete_callback', 'blueticket.pos.functions.php');
         $bt_item_invoice->set_attr('Price', array('id' => 'price'));
 
         $bt_item_invoice->sum('SubTotal');
@@ -878,8 +883,7 @@ $("#dialog").dialog("close");
         $blueticket->no_editor('CustomerDescription');
         $blueticket->change_type('CustomerDescription', 'textarea', '', array('style' => 'height:250px'));
         $blueticket->set_attr('CustomerDescription', array('id' => 'customerdesc'));
-        $blueticket->before_create('before_document_create_callback', 'blueticket.pos.functions.php');
-
+        //$blueticket->before_create('before_document_create_callback', 'blueticket.pos.functions.php');
 // invoices items month nested table
         $bt_item_invoice = $blueticket->nested_table($this->getTranslatedText('InvoicesItems'), 'InvoiceNumber', 'invoices_items', 'InvoiceNumber');
         $bt_item_invoice->columns('InvoiceNumber, Barcode, Name, CartNr, Quantity, Price, SubTotal');
