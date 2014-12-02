@@ -98,18 +98,18 @@ class printDocument {
 
         $header .= $this->prepareLine("", "========================================");
         $header .= $this->prepareHighLine("$docname cislo:", $par_DocumentNumber);
-        $header .= $this->prepareLine("", "========================================");
-        $header .= $this->prepareLine("Dodavatel:", "");
-        $header .= $this->prepareLine("FUNSTAR s.r.o.", "");
-        $header .= $this->prepareLine("Tovarnicka 14", "");
-        $header .= $this->prepareLine("955 01", "Topolcany");
-        $header .= $this->prepareLine("ICO:", "45 416 761");
-        $header .= $this->prepareLine("DIC/IC-DPH:", "SK2022976934");
-        $header .= $this->prepareLine("IBAN:", "SK8711000000002923832787");
-        $header .= $this->prepareLine("SWIFT:", "TATRSKBX");
+//        $header .= $this->prepareLine("", "========================================");
+//        $header .= $this->prepareLine("Dodavatel:", "");
+//        $header .= $this->prepareLine("FUNSTAR s.r.o.", "");
+//        $header .= $this->prepareLine("Tovarnicka 14", "");
+//        $header .= $this->prepareLine("955 01", "Topolcany");
+//        $header .= $this->prepareLine("ICO:", "45 416 761");
+//        $header .= $this->prepareLine("DIC/IC-DPH:", "SK2022976934");
+//        $header .= $this->prepareLine("IBAN:", "SK8711000000002923832787");
+//        $header .= $this->prepareLine("SWIFT:", "TATRSKBX");
 //$header .=  prepareLine(" ", " ");
         $header .= $this->prepareLine("", "========================================");
-        $header .= $this->prepareLine("Odberatel:", "");
+        $header .= $this->prepareLine("Partner:", "");
         $header .= $this->getSeo("\n" . $customer);
 //        if ($par_Desk != '-') {
 //            $result = getQuery("SELECT * FROM partners WHERE ID='$par_Desk'");
@@ -410,6 +410,44 @@ class blueticket_objects {
         $form->render();
     }
 
+    public function generateDesks() {
+        $blueticket = blueticket_forms::get_instance();
+
+        $blueticket->table('desks_pages'); //nazov tabulky v databaze
+        $blueticket->order_by('PageName', 'ASC');
+        $blueticket->table_name($this->getTranslatedText('DesksPages')); //titulok zobrazenia tabulky na stranke
+
+        $blueticket->columns('PageName,Description'); //nastavenie stlpcov tabulky, ktore sa zobrazia v tabulkovom zobrazeni
+        $blueticket->fields('PageName,Description'); //nastavenie stlpcov tabulky, ktore sa zobrazia v tabulkovom zobrazeni
+
+        $blueticket->label('PageName', $this->getTranslatedText('PageName'));
+        $blueticket->label('Description', $this->getTranslatedText('Description'));
+
+        $bt_item_invoice = $blueticket->nested_table($this->getTranslatedText('Desks'), 'ID', 'desks', 'Page');
+        $bt_item_invoice->columns('Name,FromRow,FromColumn,Rowspan,Colspan');
+        $bt_item_invoice->fields('Name,FromRow,FromColumn,Rowspan,Colspan');
+
+        return $blueticket->render();
+    }
+
+    public function generateGroups() {
+        $blueticket = blueticket_forms::get_instance();
+
+        $blueticket->table('groups'); //nazov tabulky v databaze
+        $blueticket->order_by('Name', 'ASC');
+        $blueticket->table_name($this->getTranslatedText('Groups')); //titulok zobrazenia tabulky na stranke
+
+        $blueticket->columns('Name,POSEnabled'); //nastavenie stlpcov tabulky, ktore sa zobrazia v tabulkovom zobrazeni
+        $blueticket->fields('Name,POSEnabled'); //nastavenie stlpcov tabulky, ktore sa zobrazia v tabulkovom zobrazeni
+
+        $blueticket->label('Name', $this->getTranslatedText('Name'));
+        $blueticket->label('POSEnabled', $this->getTranslatedText('POSEnabled'));
+        
+        $blueticket->relation('POSEnabled', 'responses', 'ID', 'Response');
+        
+        return $blueticket->render();
+    }
+
     public function getTranslatedText($par_Text, $par_lang = 'sk') {
         $par_lang = $this->lang;
 
@@ -435,9 +473,12 @@ class blueticket_objects {
         $return = '<div style="width:100%; height:50px;padding-left:5px">';
 
         $return .= '<a href="?report=cards" class="btn btn-primary" style="width:150px; height:30px; margin-top:5px; margin-right:5px">Karty</a>';
-        $return .= '<a href="?report=stats" class="btn btn-primary" style="width:150px; height:30px; margin-top:5px; margin-right:5px">Doklady</a>';
+        $return .= '<a href="?report=stats" class="btn btn-primary" style="width:150px; height:30px; margin-top:5px; margin-right:5px">Bloky</a>';
+        $return .= '<a href="?report=docs" class="btn btn-primary" style="width:150px; height:30px; margin-top:5px; margin-right:5px">Doklady</a>';
         $return .= '<a href="?report=partners" class="btn btn-primary" style="width:150px; height:30px; margin-top:5px; margin-right:5px">Partneri</a>';
         $return .= '<a href="?report=doctypes" class="btn btn-primary" style="width:150px; height:30px; margin-top:5px; margin-right:5px">Typy dokladov</a>';
+        $return .= '<a href="?report=desks" class="btn btn-primary" style="width:150px; height:30px; margin-top:5px; margin-right:5px">Rozlozenia</a>';
+        $return .= '<a href="?report=groups" class="btn btn-primary" style="width:150px; height:30px; margin-top:5px; margin-right:5px">Skupiny</a>';
         $return .= '<a href="?report=trans" class="btn btn-primary" style="width:150px; height:30px; margin-top:5px; margin-right:5px">Preklad</a>';
 
         $return .= '</div>';
@@ -576,8 +617,8 @@ $("#dialog").dialog("close");
         $blueticket->order_by('Name', 'ASC');
         $blueticket->table_name($this->getTranslatedText('Items')); //titulok zobrazenia tabulky na stranke
 
-        $blueticket->columns('PLU,RegistrationNumber,Name,Qty,UnitID,Price,MinimalPrice,PurchasePrice,TaxID,GroupID,SubtotalPrice,SubtotalPurchasePrice'); //nastavenie stlpcov tabulky, ktore sa zobrazia v tabulkovom zobrazeni
-        $blueticket->fields('Barcode,PLU,Name,Qty,UnitID,Price,MinimalPrice,PurchasePrice,TaxID,GroupID,Barcode'); //nastavenie stlpcov tabulky, ktore sa zobrazia v tabulkovom zobrazeni
+        $blueticket->columns('PLU,RegistrationNumber,Name,Qty,UnitID,Price,GroupID,SubtotalPrice,SubtotalPurchasePrice'); //nastavenie stlpcov tabulky, ktore sa zobrazia v tabulkovom zobrazeni
+        $blueticket->fields('Barcode,PLU,Name,Qty,UnitID,Price,MinimalPrice,PurchasePrice,TaxID,GroupID,TypeID'); //nastavenie stlpcov tabulky, ktore sa zobrazia v tabulkovom zobrazeni
 
         $blueticket->label('PLU', $this->getTranslatedText('PLU'));
         $blueticket->label('RegistrationNumber', $this->getTranslatedText('RegistrationNumber'));
@@ -590,12 +631,14 @@ $("#dialog").dialog("close");
         $blueticket->label('TaxID', $this->getTranslatedText('TaxID'));
         $blueticket->label('GroupID', $this->getTranslatedText('GroupID'));
         $blueticket->label('Barcode', $this->getTranslatedText('Barcode'));
+        $blueticket->label('TypeID', $this->getTranslatedText('TypeID'));
 
         $blueticket->column_pattern('Barcode', '<img style="width:90px; height:90px" src="inc/qrcode.php?code={RegistrationNumber}"/>');
 
         $blueticket->relation('UnitID', 'units', 'ID', 'Name');
         $blueticket->relation('TaxID', 'taxes', 'ID', 'Value');
         $blueticket->relation('GroupID', 'groups', 'ID', 'Name');
+        $blueticket->relation('TypeID', 'item_types', 'ID', 'Name');
 
         $blueticket->subselect('SubtotalPrice', '{Price}*{Qty}');
         $blueticket->subselect('SubtotalPurchasePrice', '{PurchasePrice}*{Qty}');
@@ -851,9 +894,9 @@ $("#dialog").dialog("close");
         return $blueticket_types->render();
     }
 
-    function generateInvoices($par_Type) {
+    function generateInvoices() {
         $blueticket = blueticket_forms::get_instance();
-
+        $blueticket->table('invoices');
         $blueticket->table_name($this->getTranslatedText('Invoices'));
         $blueticket->default_tab($this->getTranslatedText('Invoices'));
 

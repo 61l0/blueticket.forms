@@ -134,14 +134,14 @@ if (isset($_GET['report'])) {
                         echo $bt->generateItems();
                         break;
                     case 'stats':
-                        if(isset($_GET['type']))
-                        {
+                        if (isset($_GET['type'])) {
                             $type = $_GET['type'];
-                        }
-                        else
-                        {
+                        } else {
                             $type = 4;
                         }
+                        echo $bt->generateInvoices();
+                        break;
+                    case 'docs':
                         echo $bt->generateTypesDocuments();
                         break;
                     case 'trans':
@@ -153,6 +153,12 @@ if (isset($_GET['report'])) {
                     case 'doctypes':
                         echo $bt->generateTypes();
                         break;
+                    case 'desks':
+                        echo $bt->generateDesks();
+                        break;
+                    case 'groups':
+                        echo $bt->generateGroups();
+                        break;
                     case 'unset_all':
                         echo $bt->unset_all();
                         break;
@@ -163,15 +169,15 @@ if (isset($_GET['report'])) {
             ?>
         </div>
         <script type="text/javascript">
-            jQuery(document).on("ready blueticket_formsafterrequest", function() {
+            jQuery(document).on("ready blueticket_formsafterrequest", function () {
                 $("#regnum").autocomplete({
-                    source: function(request, response) {
+                    source: function (request, response) {
                         jQuery.ajax({
                             url: "ajax_response.php?name=" + $("#regnum").val(),
-                            success: function(result) {
+                            success: function (result) {
                                 var availableTags = [];
                                 availableTags = eval(result);
-                                response($.map(availableTags, function(item) {
+                                response($.map(availableTags, function (item) {
                                     return {label: item.Description,
                                         name: item.Name,
                                         value: item.RegNum,
@@ -184,7 +190,7 @@ if (isset($_GET['report'])) {
                             }
                         });
                     },
-                    select: function(event, ui) {
+                    select: function (event, ui) {
                         //alert(ui.item.label);
                         //$("#regnum").val(ui.item.regnum);
                         $("#price").val(ui.item.price);
@@ -204,13 +210,13 @@ if (isset($_GET['report'])) {
 //                    return $("<li>").append("<a>" + item.Name + "</a>").appendTo(ul);
 //                };
                 $("#customerid").autocomplete({
-                    source: function(request, response) {
+                    source: function (request, response) {
                         jQuery.ajax({
                             url: "ajax_response_partner.php?name=" + $("#customerid").val(),
-                            success: function(result) {
+                            success: function (result) {
                                 var availableTags = [];
                                 availableTags = eval(result);
-                                response($.map(availableTags, function(item) {
+                                response($.map(availableTags, function (item) {
                                     return {label: item.Name,
                                         value: item.ID,
                                         description: item.Description
@@ -219,7 +225,7 @@ if (isset($_GET['report'])) {
                             }
                         });
                     },
-                    select: function(event, ui) {
+                    select: function (event, ui) {
                         //alert(ui.item.label);
                         var find = '<br />';
                         var re = new RegExp(find, 'g');
