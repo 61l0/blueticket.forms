@@ -144,6 +144,9 @@ if (isset($_GET['report'])) {
                     case 'docs':
                         echo $bt->generateTypesDocuments();
                         break;
+                    case 'movements':
+                        echo $bt->generateMovements();
+                        break;
                     case 'trans':
                         echo $bt->generateTranslate();
                         break;
