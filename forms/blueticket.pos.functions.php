@@ -10,7 +10,7 @@ function before_items_insert_callback($row_data, $primary) {
     //$blueticket_db = new blueticket_forms_db();
     $blueticket_db = blueticket_forms_db::get_instance();
 
-    $blueticket_db->query('SELECT MAX(RegistrationNumber)+1 as RegNum FROM items');
+    $blueticket_db->query('SELECT MAX(CAST(RegistrationNumber AS UNSIGNED))+1 as RegNum FROM items');
     $myrow = $blueticket_db->row();
 
     if ($myrow['RegNum'] < 100000) {

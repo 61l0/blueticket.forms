@@ -956,13 +956,13 @@ $("#dialog").dialog("close");
         $blueticket->subselect('UserName', 'SELECT Username FROM users WHERE ID={UserID}');
         $blueticket->subselect('Partner', 'SELECT Name FROM partners WHERE ID=(SELECT MAX(CartNr) FROM invoices_items WHERE invoices_items.InvoiceNumber={InvoiceNumber})');
 
-        $blueticket->subselect('InvoiceTotal', 'SELECT SUM(Price*Quantity) as InvoiceTotal FROM invoices_items_month WHERE InvoiceNumber={InvoiceNumber}');
-        $blueticket->subselect('InvoiceTotalToday', 'SELECT SUM(Price*Quantity) as InvoiceTotal FROM invoices_items WHERE InvoiceNumber={InvoiceNumber}');
+        $blueticket->subselect('InvoiceTotal', 'SELECT SUM(Price*Quantity) as InvoiceTotal FROM invoices_items_month WHERE InvoiceNumber={InvoiceNumber} AND Barcode!=0');
+        $blueticket->subselect('InvoiceTotalToday', 'SELECT SUM(Price*Quantity) as InvoiceTotal FROM invoices_items WHERE InvoiceNumber={InvoiceNumber} AND Barcode!=0');
         $blueticket->order_by('InvoiceDateTime', 'DESC');
 
-        $blueticket->change_type('InvoiceTotal', 'price', '0');
-        $blueticket->column_class('InvoiceTotal', 'align-right');
-        $blueticket->sum('InvoiceTotal');
+        $blueticket->change_type('InvoiceTotal,InvoiceTotalToday', 'price', '0');
+        $blueticket->column_class('InvoiceTotal,InvoiceTotalToday', 'align-right');
+        $blueticket->sum('InvoiceTotal,InvoiceTotalToday');
 
         $blueticket->set_attr('CustomerID', array('id' => 'customerid'));
         $blueticket->no_editor('CustomerDescription');
