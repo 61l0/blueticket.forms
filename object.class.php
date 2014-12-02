@@ -442,9 +442,51 @@ class blueticket_objects {
 
         $blueticket->label('Name', $this->getTranslatedText('Name'));
         $blueticket->label('POSEnabled', $this->getTranslatedText('POSEnabled'));
-        
+
         $blueticket->relation('POSEnabled', 'responses', 'ID', 'Response');
-        
+
+        $bt_items = $blueticket->nested_table($this->getTranslatedText("Items"), 'ID', 'items', 'GroupID');
+        $bt_items->table_name($this->getTranslatedText('Items')); //titulok zobrazenia tabulky na stranke
+
+        $bt_items->columns('PLU,RegistrationNumber,Name,Qty,UnitID,Price,PurchasePrice,GroupID,SubtotalPrice,SubtotalPurchasePrice'); //nastavenie stlpcov tabulky, ktore sa zobrazia v tabulkovom zobrazeni
+        $bt_items->fields('Barcode,PLU,Name,Qty,UnitID,Price,MinimalPrice,PurchasePrice,TaxID,GroupID,TypeID'); //nastavenie stlpcov tabulky, ktore sa zobrazia v tabulkovom zobrazeni
+
+        $bt_items->label('PLU', $this->getTranslatedText('PLU'));
+        $bt_items->label('RegistrationNumber', $this->getTranslatedText('RegistrationNumber'));
+        $bt_items->label('Name', $this->getTranslatedText('Name'));
+        $bt_items->label('Qty', $this->getTranslatedText('Qty'));
+        $bt_items->label('UnitID', $this->getTranslatedText('UnitID'));
+        $bt_items->label('Price', $this->getTranslatedText('Price'));
+        $bt_items->label('MinimalPrice', $this->getTranslatedText('MinimalPrice'));
+        $bt_items->label('PurchasePrice', $this->getTranslatedText('PurchasePrice'));
+        $bt_items->label('TaxID', $this->getTranslatedText('TaxID'));
+        $bt_items->label('GroupID', $this->getTranslatedText('GroupID'));
+        $bt_items->label('Barcode', $this->getTranslatedText('Barcode'));
+        $bt_items->label('TypeID', $this->getTranslatedText('TypeID'));
+
+        $bt_items->column_pattern('Barcode', '<img style="width:90px; height:90px" src="inc/qrcode.php?code={RegistrationNumber}"/>');
+
+        $bt_items->relation('UnitID', 'units', 'ID', 'Name');
+        $bt_items->relation('TaxID', 'taxes', 'ID', 'Value');
+        $bt_items->relation('GroupID', 'groups', 'ID', 'Name');
+        $bt_items->relation('TypeID', 'item_types', 'ID', 'Name');
+
+        $bt_items->subselect('SubtotalPrice', '{Price}*{Qty}');
+        $bt_items->subselect('SubtotalPurchasePrice', '{PurchasePrice}*{Qty}');
+
+        $bt_items->highlight_row('PurchasePrice', '<', '{Price}', 'GreenYellow');
+        $bt_items->highlight_row('PurchasePrice', '=', '{Price}', 'Yellow');
+        $bt_items->highlight_row('PurchasePrice', '>', '{Price}', 'Orange');
+
+        $bt_items->sum('SubtotalPrice, SubtotalPurchasePrice'); //  Zosumarizuje zvolene stlpce - berie do uvahy vsetky riadky filtrovanej tabulky
+
+        $bt_items->label('SubtotalPrice', $this->getTranslatedText('SubtotalPrice'));
+        $bt_items->label('SubtotalPurchasePrice', $this->getTranslatedText('SubtotalPurchasePrice'));
+
+        $bt_items->column_class('Qty,Price,MinimalPrice,PurchasePrice,SubtotalPrice,SubtotalPurchasePrice,SellToday,SellHistory', 'align-right');
+        $bt_items->change_type('Price,MinimalPrice,PurchasePrice,SubtotalPrice,SubtotalPurchasePrice,SellToday,SellHistory', 'price', '0');
+        $bt_items->before_insert('before_items_insert_callback', 'blueticket.pos.functions.php');
+
         return $blueticket->render();
     }
 
@@ -900,13 +942,13 @@ $("#dialog").dialog("close");
         $blueticket->table_name($this->getTranslatedText('Invoices'));
         $blueticket->default_tab($this->getTranslatedText('Invoices'));
 
-        $blueticket->columns('Partner, InvoiceDateTime, InvoiceNumber, UserName, InvoiceTotal'); //nastavenie stlpcov tabulky, ktore sa zobrazia v tabulkovom zobrazeni
+        $blueticket->columns('Partner, InvoiceDateTime, InvoiceNumber, UserName, InvoiceTotal,InvoiceTotalToday'); //nastavenie stlpcov tabulky, ktore sa zobrazia v tabulkovom zobrazeni
         $blueticket->fields('CustomerID, CustomerDescription, InvoiceDateTime'); //nastavenie stlpcov tabulky, ktore sa zobrazia v tabulkovom zobrazeni
         $blueticket->label('InvoiceDateTime', $this->getTranslatedText('InvoiceDateTime'));
         $blueticket->label('InvoiceNumber', $this->getTranslatedText('InvoiceNumber'));
         $blueticket->label('UserID', $this->getTranslatedText('UserID'));
         $blueticket->label('InvoiceTotal', $this->getTranslatedText('InvoiceTotal'));
-//$blueticket->label('InvoiceTotalToday', $this->getTranslatedText('InvoiceTotalToday'));
+        $blueticket->label('InvoiceTotalToday', $this->getTranslatedText('InvoiceTotalToday'));
         $blueticket->label('Partner', $this->getTranslatedText('Partner'));
         $blueticket->label('CustomerID', $this->getTranslatedText('CustomerID'));
         $blueticket->label('CustomerDescription', $this->getTranslatedText('CustomerDescription'));
@@ -914,8 +956,8 @@ $("#dialog").dialog("close");
         $blueticket->subselect('UserName', 'SELECT Username FROM users WHERE ID={UserID}');
         $blueticket->subselect('Partner', 'SELECT Name FROM partners WHERE ID=(SELECT MAX(CartNr) FROM invoices_items WHERE invoices_items.InvoiceNumber={InvoiceNumber})');
 
-        $blueticket->subselect('InvoiceTotal', 'SELECT SUM(Price*Quantity) as InvoiceTotal FROM invoices_items WHERE InvoiceNumber={InvoiceNumber}');
-//$blueticket->subselect('InvoiceTotalToday', 'SELECT SUM(Price*Quantity) as InvoiceTotal FROM invoices_items WHERE InvoiceNumber={InvoiceNumber}');
+        $blueticket->subselect('InvoiceTotal', 'SELECT SUM(Price*Quantity) as InvoiceTotal FROM invoices_items_month WHERE InvoiceNumber={InvoiceNumber}');
+        $blueticket->subselect('InvoiceTotalToday', 'SELECT SUM(Price*Quantity) as InvoiceTotal FROM invoices_items WHERE InvoiceNumber={InvoiceNumber}');
         $blueticket->order_by('InvoiceDateTime', 'DESC');
 
         $blueticket->change_type('InvoiceTotal', 'price', '0');
