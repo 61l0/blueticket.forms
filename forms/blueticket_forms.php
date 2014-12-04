@@ -1706,7 +1706,8 @@ class blueticket_forms {
 
             foreach ($this->columns as $field => $fitem) {
                 //$out[] = htmlspecialchars_decode(strip_tags($this->_render_export_item($field, $row[$field], $row['primary_key'], $row)), ENT_QUOTES);
-                $objPHPExcel->setActiveSheetIndex(0)->setCellValue($cols[$i] . $current_row, $row[$field]);
+                $value = $this->_render_export_item($field, $row[$field], $row['primary_key'], $row);
+                $objPHPExcel->setActiveSheetIndex(0)->setCellValue($cols[$i] . $current_row, $value);
                 $i++;
             }
             //fputcsv($output, $out, blueticket_forms_config::$csv_delimiter, blueticket_forms_config::$csv_enclosure);
@@ -2016,9 +2017,11 @@ class blueticket_forms {
                 //$out[] = htmlspecialchars_decode(strip_tags($this->_render_export_item($field, $row[$field], $row['primary_key'], $row)), ENT_QUOTES);
                 $cell = $cols[$i] . $current_row;
 
+                $value = $this->_render_export_item($field, $row[$field], $row['primary_key'], $row);
+                
                 //echo $cell . '<br/>';
 
-                $objPHPExcel->getActiveSheet()->setCellValueByColumnAndRow($i, $current_row, $row[$field]);
+                $objPHPExcel->getActiveSheet()->setCellValueByColumnAndRow($i, $current_row, $value);
 
                 $i++;
             }
