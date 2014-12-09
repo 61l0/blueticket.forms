@@ -1,6 +1,18 @@
 <?php
 error_reporting(0);
 session_start();
+
+if(isset($_REQUEST['report']) && $_REQUEST['report']=='logout')
+{
+    $_SESSION['loggedin'] = '';
+}
+
+if(isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == 'admin')
+{
+}
+else
+        header('location: login.php');
+
 require_once ('object.class.php');
 
 $bt = new blueticket_objects();
@@ -126,7 +138,7 @@ if (isset($_GET['report'])) {
         <?php
         echo $bt->generateMenu();
         ?>
-        <div style="overflow: auto; position: absolute; top:50px; left: 10px; padding:10px 10px 10px 10px; right: 10px; bottom: 10px; border: 1px solid graytext">
+        <div style="height: auto; padding:10px 10px 10px 10px; border: 1px solid graytext">
             <?php
             if (isset($_GET['report'])) {
                 switch ($_GET['report']) {

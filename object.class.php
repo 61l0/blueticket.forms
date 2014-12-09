@@ -645,6 +645,7 @@ class blueticket_objects {
         $return .= '<a href="?report=desks" class="btn btn-primary" style="width:110px; height:30px; margin-top:5px; margin-right:5px">Rozlozenia</a>';
         $return .= '<a href="?report=groups" class="btn btn-primary" style="width:110px; height:30px; margin-top:5px; margin-right:5px">Skupiny</a>';
         $return .= '<a href="?report=trans" class="btn btn-primary" style="width:110px; height:30px; margin-top:5px; margin-right:5px">Preklad</a>';
+        $return .= '<a href="?report=logout" class="btn btn-primary" style="width:110px; height:30px; margin-top:5px; margin-right:5px">Odhlásiť</a>';
 
         $return .= '</div>';
 
