@@ -94,6 +94,7 @@ class blueticket_forms_config
     public static $enable_search = true; // show searck block
     public static $enable_pagination = true; // show pagination
     public static $enable_csv_export = true; // show csv export button
+    public static $enable_xls_export = true; // show csv export button
     public static $enable_table_title = true; // show table title and toggle button
     public static $enable_numbers = true; // show row numbers in grid
     public static $enable_limitlist = true; // show row numbers in grid

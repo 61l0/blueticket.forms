@@ -11,6 +11,7 @@
         <div class="btn-group pull-right">
             <?php echo $this->print_button('btn btn-default', 'glyphicon glyphicon-print');
             echo $this->csv_button('btn btn-default', 'glyphicon glyphicon-file');
+            echo $this->xls_button('btn btn-default', 'glyphicon glyphicon-file');
             ?>
         </div>
     <?php echo $this->add_button('btn btn-success', 'glyphicon glyphicon-plus-sign'); ?>

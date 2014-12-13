@@ -42,6 +42,7 @@ class blueticket_forms {
     protected $is_view = true;
     protected $is_remove = true;
     protected $is_csv = true;
+    protected $is_xls = true;
     protected $is_search = true;
     protected $is_print = true;
     protected $is_title = true;
@@ -218,6 +219,7 @@ class blueticket_forms {
         $this->is_print = blueticket_forms_config::$enable_printout;
         $this->is_title = blueticket_forms_config::$enable_table_title;
         $this->is_csv = blueticket_forms_config::$enable_csv_export;
+        $this->is_xls = blueticket_forms_config::$enable_xls_export;
         $this->is_numbers = blueticket_forms_config::$enable_numbers;
         $this->is_pagination = blueticket_forms_config::$enable_pagination;
         $this->is_search = blueticket_forms_config::$enable_search;
@@ -694,6 +696,11 @@ class blueticket_forms {
 
     public function unset_csv($bool = true) {
         $this->is_csv = !(bool) $bool;
+        return $this;
+    }
+
+    public function unset_xls($bool = true) {
+        $this->is_xls = !(bool) $bool;
         return $this;
     }
 
@@ -1588,8 +1595,11 @@ class blueticket_forms {
                 break;
             case 'csv':
                 $this->_set_field_types('list', blueticket_forms_config::$csv_all_fields);
-                //return $this->render_custom_csv();
                 return $this->_csv();
+                break;
+            case 'xls':
+                $this->_set_field_types('list', blueticket_forms_config::$csv_all_fields);
+                return $this->_xls();
                 break;
             case 'list':
             default:
@@ -1620,6 +1630,9 @@ class blueticket_forms {
                 break;
             case 'csv':
                 return $this->render_custom_csv();
+                break;
+            case 'xls':
+                return $this->render_custom_xls();
                 break;
             default:
                 return $this->render_custom_datagrid();
@@ -1654,9 +1667,40 @@ class blueticket_forms {
     }
 
     protected function render_custom_csv() {
+        if (!$this->is_csv) {
+            return self::error('Restricted');
+        }
+        $this->columns = $this->fields_list;
+        $query = $this->parse_query_params();
+        $db = blueticket_forms_db::get_instance($this->connection);
+        $order_by = $this->_build_order_by();
+        $this->_set_column_names();
+        ini_set('auto_detect_line_endings', true);
+        header("Pragma: public");
+        header("Expires: 0");
+        header("Cache-Control: must-revalidate, post-check=0, pre-check=0");
+        header("Cache-Control: public");
+        header("Content-type: application/octet-stream");
+        $table_name = $this->_clean_file_name(trim(html_entity_decode($this->table_name, ENT_QUOTES, 'utf-8')));
+        header("Content-Disposition: attachment; filename=\"" . ($table_name ? $table_name : 'table') . ".csv\"");
+        header("Content-Transfer-Encoding: binary");
+        $output = fopen('php://output', 'w');
+        fwrite($output, chr(0xEF) . chr(0xBB) . chr(0xBF)); // bom
+        fputcsv($output, $this->columns_names, blueticket_forms_config::$csv_delimiter, blueticket_forms_config::$csv_enclosure);
+        $db->query($query . ' ' . $order_by);
+        while ($row = $db->result->fetch_assoc()) { // low level result process, saves memory
+            $out = array();
+            foreach ($this->columns as $field => $fitem) {
+                $out[] = htmlspecialchars_decode(strip_tags($this->_render_export_item($field, $row[$field], $row['primary_key'], $row)), ENT_QUOTES);
+            }
+            fputcsv($output, $out, blueticket_forms_config::$csv_delimiter, blueticket_forms_config::$csv_enclosure);
+        }
+    }
+
+    protected function render_custom_xls() {
         require_once dirname(__FILE__) . '/plugins/excel/Classes/PHPExcel.php';
 
-        if (!$this->is_csv) {
+        if (!$this->is_xls) {
             return self::error('Restricted');
         }
         $this->columns = $this->fields_list;
@@ -1946,10 +1990,59 @@ class blueticket_forms {
         exit();
     }
 
-    public function _csv() {
+    public function _csv()
+    {
+        if (!$this->is_csv)
+        {
+            return self::error('Restricted');
+        }
+        $db = blueticket_forms_db::get_instance($this->connection);
+        $select = $this->_build_select_list(true);
+        $table_join = $this->_build_table_join();
+        $where = $this->_build_where();
+        $order_by = $this->_build_order_by();
+        $this->_set_column_names();
+        $headers = array();
+        foreach ($this->columns as $field => $fitem)
+        {
+            if (isset($this->field_type[$field]) && ($this->field_type[$field] == 'password' or $this->field_type[$field] ==
+                'hidden'))
+                continue;
+            $headers[] = $this->columns_names[$field];
+        }
+        ini_set('auto_detect_line_endings', true);
+        header("Pragma: public");
+        header("Expires: 0");
+        header("Cache-Control: must-revalidate, post-check=0, pre-check=0");
+        header("Cache-Control: public");
+        header("Content-type: application/octet-stream");
+        header("Content-Disposition: attachment; filename=\"" . $this->_clean_file_name($this->table_name ? $this->table_name :
+            $this->table) . ".csv\"");
+        header("Content-Transfer-Encoding: binary");
+        $output = fopen('php://output', 'w');
+        fwrite($output, chr(0xEF) . chr(0xBB) . chr(0xBF)); // bom
+        fputcsv($output, $headers, blueticket_forms_config::$csv_delimiter, blueticket_forms_config::$csv_enclosure);
+        $db->query("SELECT {$select} FROM `{$this->table}` {$table_join} {$where} {$order_by}");
+        while ($row = $db->result->fetch_assoc()) // low level result process, saves memory
+        {
+            $out = array();
+            foreach ($this->columns as $field => $fitem)
+            {
+                if (isset($this->field_type[$field]) && ($this->field_type[$field] == 'password' or $this->field_type[$field] ==
+                    'hidden'))
+                    continue;
+                $out[] = htmlspecialchars_decode(strip_tags($this->_render_export_item($field, $row[$field], $row['primary_key'], $row)),
+                    ENT_QUOTES);
+            }
+            fputcsv($output, $out, blueticket_forms_config::$csv_delimiter, blueticket_forms_config::$csv_enclosure);
+        }
+    }
+    
+    
+    public function _xls() {
         require_once dirname(__FILE__) . '/plugins/excel/Classes/PHPExcel.php';
 
-        if (!$this->is_csv) {
+        if (!$this->is_xls) {
             return self::error('Restricted');
         }
         $db = blueticket_forms_db::get_instance($this->connection);
@@ -2018,7 +2111,7 @@ class blueticket_forms {
                 $cell = $cols[$i] . $current_row;
 
                 $value = $this->_render_export_item($field, $row[$field], $row['primary_key'], $row);
-                
+
                 //echo $cell . '<br/>';
 
                 $objPHPExcel->getActiveSheet()->setCellValueByColumnAndRow($i, $current_row, $value);
@@ -4596,6 +4689,7 @@ class blueticket_forms {
             'is_edit',
             'is_remove',
             'is_csv',
+            'is_xls',
             'buttons',
             'validation_required',
             'validation_pattern',
@@ -9028,6 +9122,12 @@ class blueticket_forms {
     protected function csv_button($class = '', $icon = '') {
         if ($this->is_csv && !isset($this->hide_button['csv'])) {
             return $this->render_button('export_csv', 'csv', '', $class . ' blueticket_forms-in-new-window', $icon);
+        }
+    }
+
+    protected function xls_button($class = '', $icon = '') {
+        if ($this->is_xls && !isset($this->hide_button['xls'])) {
+            return $this->render_button('export_xls', 'xls', '', $class . ' blueticket_forms-in-new-window', $icon);
         }
     }
 
