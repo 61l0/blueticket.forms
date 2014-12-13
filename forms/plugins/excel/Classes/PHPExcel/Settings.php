@@ -96,7 +96,7 @@ class PHPExcel_Settings
      *
      * @var string
      */
-    private static $_pdfRendererName = NULL;
+    private static $_pdfRendererName = 'tcPDF';
 
     /**
      * Directory Path to the external Library used for rendering PDF files
