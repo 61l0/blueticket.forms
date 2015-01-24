@@ -475,7 +475,7 @@ class blueticket_objects {
 
         $bt_item_invoice_month->sum('SubTotal');
         //items
-        
+
         return $blueticket->render();
     }
 
@@ -536,7 +536,7 @@ class blueticket_objects {
         $bt_items->change_type('Price,MinimalPrice,PurchasePrice,SubtotalPrice,SubtotalPurchasePrice,SellToday,SellHistory', 'price', '0');
         $bt_items->before_insert('before_items_insert_callback', 'blueticket.pos.functions.php');
 
-                $bt_item_invoice = $blueticket->nested_table($this->getTranslatedText('InvoicesItems'), 'ID', 'invoices_items', 'Group');
+        $bt_item_invoice = $blueticket->nested_table($this->getTranslatedText('InvoicesItems'), 'ID', 'invoices_items', 'Group');
         $bt_item_invoice->columns('InvoiceDateTime, InvoiceNumber, Barcode, Name, Group, CartNr, Quantity, Price, SubTotal');
         $bt_item_invoice->subselect('SubTotal', '{Price}*{Quantity}');
         $bt_item_invoice->change_type('InvoiceDateTime', 'datetime');
@@ -577,7 +577,7 @@ class blueticket_objects {
         //$bt_item_invoice_month->subselect('InvoiceDateTime', 'SELECT InvoiceDateTime FROM invoices WHERE InvoiceNumber={InvoiceNumber}');
 
         $bt_item_invoice_month->sum('SubTotal');
-        
+
         return $blueticket->render();
     }
 
@@ -602,14 +602,13 @@ class blueticket_objects {
         return $par_Text;
     }
 
-    function generateMovements()
-    {
+    function generateMovements() {
         $bt_item_invoice_month = blueticket_forms::get_instance();
 
         $bt_item_invoice_month->table('invoices_items_month');
         $bt_item_invoice_month->table_name('InvoicesItemsMonth');
-        $bt_item_invoice_month->order_by('InvoiceDateTime','DESC');
-        
+        $bt_item_invoice_month->order_by('InvoiceDateTime', 'DESC');
+
         $bt_item_invoice_month->columns('InvoiceDateTime, InvoiceNumber, Barcode, Name, Group, CartNr, Quantity, Price, SubTotal');
         $bt_item_invoice_month->subselect('SubTotal', '{Price}*{Quantity}');
         $bt_item_invoice_month->relation("Group", "groups", "ID", "Name");
@@ -628,11 +627,11 @@ class blueticket_objects {
         //$bt_item_invoice_month->subselect('InvoiceDateTime', 'SELECT MAX(InvoiceDateTime) FROM invoices WHERE InvoiceNumber={InvoiceNumber}');
         $bt_item_invoice_month->change_type('InvoiceDateTime', 'datetime');
 
-        $bt_item_invoice_month->sum('SubTotal');        
-        
+        $bt_item_invoice_month->sum('SubTotal');
+
         return $bt_item_invoice_month->render();
     }
-    
+
     function generateMenu() {
         $return = '<div style="width:100%; height:50px;padding-left:5px">';
 
@@ -825,6 +824,15 @@ $("#dialog").dialog("close");
         $blueticket->column_class('Qty,Price,MinimalPrice,PurchasePrice,SubtotalPrice,SubtotalPurchasePrice,SellToday,SellHistory', 'align-right');
         $blueticket->change_type('Price,MinimalPrice,PurchasePrice,SubtotalPrice,SubtotalPurchasePrice,SellToday,SellHistory', 'price', '0');
         $blueticket->before_insert('before_items_insert_callback', 'blueticket.pos.functions.php');
+
+
+        $bt_content = $blueticket->nested_table($this->getTranslatedText('ItemsContent'), 'RegistrationNumber', 'items_content', 'RegistrationNumber');
+        $bt_content->label('RegistrationNumber', $this->getTranslatedText('RegistrationNumber'));
+        $bt_content->label('ContentFrom', $this->getTranslatedText('ContentFrom'));
+        $bt_content->label('Quantity', $this->getTranslatedText('Quantity'));
+        $bt_content->relation("ContentFrom", "items", "RegistrationNumber", "Name");
+        $bt_content->change_type('Quantity', 'price', '0');
+
 
 // invoices items month nested table
         $bt_item_invoice = $blueticket->nested_table($this->getTranslatedText('InvoicesItems'), 'RegistrationNumber', 'invoices_items', 'Barcode');
