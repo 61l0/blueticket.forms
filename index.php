@@ -174,6 +174,12 @@ if (isset($_GET['report'])) {
                     case 'groups':
                         echo $bt->generateGroups();
                         break;
+                    case 'units':
+                        echo $bt->generateUnits();
+                        break;
+                    case 'users':
+                        echo $bt->generateUsers();
+                        break;
                     case 'unset_all':
                         echo $bt->unset_all();
                         break;

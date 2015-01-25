@@ -635,16 +635,18 @@ class blueticket_objects {
     function generateMenu() {
         $return = '<div style="width:100%; height:50px;padding-left:5px">';
 
-        $return .= '<a href="?report=cards" class="btn btn-primary" style="width:110px; height:30px; margin-top:5px; margin-right:5px">Karty</a>';
-        $return .= '<a href="?report=stats" class="btn btn-primary" style="width:110px; height:30px; margin-top:5px; margin-right:5px">Bloky</a>';
-        $return .= '<a href="?report=docs" class="btn btn-primary" style="width:110px; height:30px; margin-top:5px; margin-right:5px">Doklady</a>';
-        $return .= '<a href="?report=movements" class="btn btn-primary" style="width:110px; height:30px; margin-top:5px; margin-right:5px">Pohyby</a>';
-        $return .= '<a href="?report=partners" class="btn btn-primary" style="width:110px; height:30px; margin-top:5px; margin-right:5px">Partneri</a>';
-        $return .= '<a href="?report=doctypes" class="btn btn-primary" style="width:110px; height:30px; margin-top:5px; margin-right:5px">Typy dokladov</a>';
-        $return .= '<a href="?report=desks" class="btn btn-primary" style="width:110px; height:30px; margin-top:5px; margin-right:5px">Rozlozenia</a>';
-        $return .= '<a href="?report=groups" class="btn btn-primary" style="width:110px; height:30px; margin-top:5px; margin-right:5px">Skupiny</a>';
-        $return .= '<a href="?report=trans" class="btn btn-primary" style="width:110px; height:30px; margin-top:5px; margin-right:5px">Preklad</a>';
-        $return .= '<a href="?report=logout" class="btn btn-primary" style="width:110px; height:30px; margin-top:5px; margin-right:5px">Odhlásiť</a>';
+        $return .= '<a href="?report=cards" class="btn btn-primary" style="width:100px; height:30px; margin-top:5px; margin-right:5px">Karty</a>';
+        $return .= '<a href="?report=stats" class="btn btn-primary" style="width:100px; height:30px; margin-top:5px; margin-right:5px">Bloky</a>';
+        $return .= '<a href="?report=docs" class="btn btn-primary" style="width:100px; height:30px; margin-top:5px; margin-right:5px">Doklady</a>';
+        $return .= '<a href="?report=movements" class="btn btn-primary" style="width:100px; height:30px; margin-top:5px; margin-right:5px">Pohyby</a>';
+        $return .= '<a href="?report=partners" class="btn btn-primary" style="width:100px; height:30px; margin-top:5px; margin-right:5px">Partneri</a>';
+        $return .= '<a href="?report=doctypes" class="btn btn-primary" style="width:100px; height:30px; margin-top:5px; margin-right:5px">Typy dokladov</a>';
+        $return .= '<a href="?report=desks" class="btn btn-primary" style="width:100px; height:30px; margin-top:5px; margin-right:5px">Rozlozenia</a>';
+        $return .= '<a href="?report=groups" class="btn btn-primary" style="width:100px; height:30px; margin-top:5px; margin-right:5px">Skupiny</a>';
+        $return .= '<a href="?report=units" class="btn btn-primary" style="width:100px; height:30px; margin-top:5px; margin-right:5px">Jednotky</a>';
+        $return .= '<a href="?report=trans" class="btn btn-primary" style="width:100px; height:30px; margin-top:5px; margin-right:5px">Preklad</a>';
+        $return .= '<a href="?report=users" class="btn btn-primary" style="width:100px; height:30px; margin-top:5px; margin-right:5px">Uzivatelia</a>';
+        $return .= '<a href="?report=logout" class="btn btn-primary" style="width:100px; height:30px; margin-top:5px; margin-right:5px">Odhlásiť</a>';
 
         $return .= '</div>';
 
@@ -983,6 +985,19 @@ $("#dialog").dialog("close");
         return $blueticket_types->render();
     }
 
+    function generateUnits() {
+        $blueticket_units = blueticket_forms::get_instance();
+        $blueticket_units->table('units');
+        $blueticket_units->table_name($this->getTranslatedText('units'));
+        $blueticket_units->default_tab($this->getTranslatedText('units'));
+
+        $blueticket_units->columns('Name'); //nastavenie stlpcov tabulky, ktore sa zobrazia v tabulkovom zobrazeni
+        $blueticket_units->fields('Name'); //nastavenie stlpcov tabulky, ktore sa zobrazia v tabulkovom zobrazeni
+        $blueticket_units->label('Name', $this->getTranslatedText('Name'));
+        
+        return $blueticket_units->render();
+    }
+
     function generateTypesDocuments() {
         echo '<script type="text/javascript">
             function print_doc(par_documentno) {
@@ -1189,4 +1204,88 @@ $("#dialog").dialog("close");
         return $blueticket->render();
     }
 
+    function generateUsers() {
+        $blueticket_u = blueticket_forms::get_instance();
+
+        $blueticket_u->table('users');
+        $blueticket_u->table_name($this->getTranslatedText('Users'));
+        $blueticket_u->default_tab($this->getTranslatedText('Users'));
+
+        $blueticket_u->columns("Username, Password");
+        $blueticket_u->fields("Username, Password");
+
+        $blueticket = $blueticket_u->nested_table($this->getTranslatedText('Invoices'), 'ID', 'invoices', 'UserID');
+        $blueticket->table('invoices');
+        $blueticket->table_name($this->getTranslatedText('Invoices'));
+        $blueticket->default_tab($this->getTranslatedText('Invoices'));
+
+        $blueticket->columns('Partner, InvoiceDateTime, InvoiceNumber, UserName, InvoiceTotal,InvoiceTotalToday'); //nastavenie stlpcov tabulky, ktore sa zobrazia v tabulkovom zobrazeni
+        $blueticket->fields('CustomerID, CustomerDescription, InvoiceDateTime'); //nastavenie stlpcov tabulky, ktore sa zobrazia v tabulkovom zobrazeni
+        $blueticket->label('InvoiceDateTime', $this->getTranslatedText('InvoiceDateTime'));
+        $blueticket->label('InvoiceNumber', $this->getTranslatedText('InvoiceNumber'));
+        $blueticket->label('UserID', $this->getTranslatedText('UserID'));
+        $blueticket->label('InvoiceTotal', $this->getTranslatedText('InvoiceTotal'));
+        $blueticket->label('InvoiceTotalToday', $this->getTranslatedText('InvoiceTotalToday'));
+        $blueticket->label('Partner', $this->getTranslatedText('Partner'));
+        $blueticket->label('CustomerID', $this->getTranslatedText('CustomerID'));
+        $blueticket->label('CustomerDescription', $this->getTranslatedText('CustomerDescription'));
+
+        $blueticket->subselect('UserName', 'SELECT Username FROM users WHERE ID={UserID}');
+        $blueticket->subselect('Partner', 'SELECT Name FROM partners WHERE ID=(SELECT MAX(CartNr) FROM invoices_items WHERE invoices_items.InvoiceNumber={InvoiceNumber})');
+
+        $blueticket->subselect('InvoiceTotal', 'SELECT SUM(Price*Quantity) as InvoiceTotal FROM invoices_items_month WHERE InvoiceNumber={InvoiceNumber} AND Barcode!=0');
+        $blueticket->subselect('InvoiceTotalToday', 'SELECT SUM(Price*Quantity) as InvoiceTotal FROM invoices_items WHERE InvoiceNumber={InvoiceNumber} AND Barcode!=0');
+        $blueticket->order_by('InvoiceDateTime', 'DESC');
+
+        $blueticket->change_type('InvoiceTotal,InvoiceTotalToday', 'price', '0');
+        $blueticket->column_class('InvoiceTotal,InvoiceTotalToday', 'align-right');
+        $blueticket->sum('InvoiceTotal,InvoiceTotalToday');
+
+        $blueticket->set_attr('CustomerID', array('id' => 'customerid'));
+        $blueticket->no_editor('CustomerDescription');
+        $blueticket->change_type('CustomerDescription', 'textarea', '', array('style' => 'height:250px'));
+        $blueticket->set_attr('CustomerDescription', array('id' => 'customerdesc'));
+        //$blueticket->before_create('before_document_create_callback', 'blueticket.pos.functions.php');
+// invoices items month nested table
+        $bt_item_invoice = $blueticket->nested_table($this->getTranslatedText('InvoicesItems'), 'InvoiceNumber', 'invoices_items', 'InvoiceNumber');
+        $bt_item_invoice->columns('InvoiceNumber, Barcode, Name, Group, CartNr, Quantity, Price, SubTotal');
+        $bt_item_invoice->subselect('SubTotal', '{Price}*{Quantity}');
+
+        $bt_item_invoice->label('InvoiceNumber', $this->getTranslatedText('InvoiceNumber'));
+        $bt_item_invoice->label('Barcode', $this->getTranslatedText('Barcode'));
+        $bt_item_invoice->label('Name', $this->getTranslatedText('Name'));
+        $bt_item_invoice->label('CartNr', $this->getTranslatedText('CartNr'));
+        $bt_item_invoice->label('Quantity', $this->getTranslatedText('Quantity'));
+        $bt_item_invoice->label('Price', $this->getTranslatedText('Price'));
+        $bt_item_invoice->label('SubTotal', $this->getTranslatedText('SubTotal'));
+        $bt_item_invoice->label('Group', $this->getTranslatedText('GroupID'));
+        $bt_item_invoice->change_type('InvoiceDateTime', 'datetime');
+        $bt_item_invoice->relation("Group", "groups", "ID", "Name");
+        $bt_item_invoice->column_class('Quantity,Price,SubTotal', 'align-right');
+        $bt_item_invoice->change_type('Quantity,Price,SubTotal', 'price', '0');
+
+        $bt_item_invoice->sum('SubTotal');
+
+        $bt_item_invoice_month = $blueticket->nested_table($this->getTranslatedText('InvoicesItemsMonth'), 'InvoiceNumber', 'invoices_items_month', 'InvoiceNumber');
+        $bt_item_invoice_month->columns('InvoiceNumber, Barcode, Name, Group, CartNr, Quantity, Price, SubTotal');
+        $bt_item_invoice_month->subselect('SubTotal', '{Price}*{Quantity}');
+
+        $bt_item_invoice_month->label('InvoiceNumber', $this->getTranslatedText('InvoiceNumber'));
+        $bt_item_invoice_month->label('Barcode', $this->getTranslatedText('Barcode'));
+        $bt_item_invoice_month->label('Name', $this->getTranslatedText('Name'));
+        $bt_item_invoice_month->label('CartNr', $this->getTranslatedText('CartNr'));
+        $bt_item_invoice_month->label('Quantity', $this->getTranslatedText('Quantity'));
+        $bt_item_invoice_month->label('Price', $this->getTranslatedText('Price'));
+        $bt_item_invoice_month->label('SubTotal', $this->getTranslatedText('SubTotal'));
+        $bt_item_invoice_month->label('Group', $this->getTranslatedText('GroupID'));
+        $bt_item_invoice_month->change_type('InvoiceDateTime', 'datetime');
+        $bt_item_invoice_month->relation("Group", "groups", "ID", "Name");
+        $bt_item_invoice_month->column_class('Quantity,Price,SubTotal', 'align-right');
+        $bt_item_invoice_month->change_type('Quantity,Price,SubTotal', 'price', '0');
+
+        $bt_item_invoice_month->sum('SubTotal');
+        
+        
+        return $blueticket_u->render();
+    }
 }
