@@ -45,6 +45,26 @@ class printDocument {
         return $myString;
     }
 
+    function prepareLinePdf($parLeftStr, $parRightStr, $parLength = 40) {
+        $parLeftStr = $this->getSeo($parLeftStr);
+        $parRightStr = $this->getSeo($parRightStr);
+
+        if (strlen($parLeftStr) >= ($parLength - strlen($parRightStr))) {
+            $parLeftStr = substr($parLeftStr, 0, ($parLength - strlen($parRightStr)) - 2);
+        }
+
+        $Lng = $parLength - strlen($parRightStr) - strlen($parLeftStr);
+
+        $tempSpace = "";
+
+        for ($i = 0; $i < $Lng; $i++)
+            $tempSpace .= " ";
+
+        $myString = "\n" . $parLeftStr . $tempSpace . $parRightStr;
+
+        return $myString;
+    }    
+    
     function prepareHighLine($parLeftStr, $parRightStr, $parLength = 48) {
         $parLeftStr = $this->getSeo($parLeftStr);
         $parRightStr = $this->getSeo($parRightStr);
@@ -65,7 +85,55 @@ class printDocument {
         return $myString;
     }
 
-    function prepareHeader($par_DocumentNumber = "") {
+    function prepareHeaderPdf($par_DocumentNumber = "") {
+
+        $header = "\n"; //chr(27) . chr(116) . chr(18);
+//for($i=0;$i<255;$i++)
+//{
+//    $header .= chr(27) . "!" . chr($i) . "$i - ABC\n";
+//}
+        $blueticket = blueticket_forms_db::get_instance();
+        $blueticket->query("SELECT * FROM invoices WHERE InvoiceNumber='$par_DocumentNumber'");
+        $mydocument = $blueticket->row();
+
+        $typeid = $mydocument['TypeID'];
+        $customer = $mydocument['CustomerDescription'];
+        $deliveryid = $mydocument['DeliveryTypeID'];
+        $paymentid = $mydocument['PaymentTypeID'];
+        $date = date('d.m.Y', strtotime($mydocument['InvoiceDateTime']));
+
+        $blueticket->query("SELECT * FROM document_types WHERE ID='$typeid'");
+        $mytype = $blueticket->row();
+
+        $docname = $mytype['Description'];
+
+        $blueticket->query("SELECT * FROM delivery_types WHERE ID='$deliveryid'");
+        $mydelivery = $blueticket->row();
+
+        $delivery = $mydelivery['Description'];
+
+        $blueticket->query("SELECT * FROM payment_types WHERE ID='$paymentid'");
+        $mypayment = $blueticket->row();
+        $payment = $mypayment['PaymentTypeName'];
+
+        $header .= $this->prepareLinePdf("", "========================================");
+        $header .= $this->prepareLinePdf("$docname cislo:", $par_DocumentNumber);
+        $header .= $this->prepareLinePdf("", "========================================");
+        $header .= $this->prepareLinePdf("Partner:", "");
+        $header .= $this->getSeo("\n" . $customer);
+        $header .= $this->prepareLinePdf("", "========================================");
+        $header .= $this->prepareLinePdf("Datum vystavenia:", $date);
+        $header .= $this->prepareLinePdf("Datum dodania:", $date);
+        $header .= $this->prepareLinePdf("", "========================================");
+        $header .= $this->prepareLinePdf("Forma uhrady:", $payment);
+        $header .= $this->prepareLinePdf("Sposob dodania:", $delivery);
+        $header .= $this->prepareLinePdf("", "========================================");
+//$header .=  prepareLine(" ", " ");
+
+        return $header;
+    }
+
+        function prepareHeader($par_DocumentNumber = "") {
 
         $header = "\n"; //chr(27) . chr(116) . chr(18);
 //for($i=0;$i<255;$i++)
@@ -98,16 +166,15 @@ class printDocument {
 
         $header .= $this->prepareLine("", "========================================");
         $header .= $this->prepareHighLine("$docname cislo:", $par_DocumentNumber);
-//        $header .= $this->prepareLine("", "========================================");
-//        $header .= $this->prepareLine("Dodavatel:", "");
-//        $header .= $this->prepareLine("FUNSTAR s.r.o.", "");
-//        $header .= $this->prepareLine("Tovarnicka 14", "");
-//        $header .= $this->prepareLine("955 01", "Topolcany");
-//        $header .= $this->prepareLine("ICO:", "45 416 761");
-//        $header .= $this->prepareLine("DIC/IC-DPH:", "SK2022976934");
-//        $header .= $this->prepareLine("IBAN:", "SK8711000000002923832787");
-//        $header .= $this->prepareLine("SWIFT:", "TATRSKBX");
-//$header .=  prepareLine(" ", " ");
+        $header .= $this->prepareLine("", "========================================");
+        $header .= $this->prepareLine("Dodavatel:", "");
+        $header .= $this->prepareLine("JD SLOVAKIA s.r.o.", "");
+        $header .= $this->prepareLine("K. Nováckeho 8/7", "");
+        $header .= $this->prepareLine("971 01", "Prievidza");
+        $header .= $this->prepareLine("ICO:", "36 820 989");
+        $header .= $this->prepareLine("DIC/IC-DPH:", "SK2022449814");
+        $header .= $this->prepareLine("IBAN:", "SK96 0200 0000 0030 9103 4751");
+        $header .= $this->prepareLine("SWIFT:", "SUBASKBX");
         $header .= $this->prepareLine("", "========================================");
         $header .= $this->prepareLine("Partner:", "");
         $header .= $this->getSeo("\n" . $customer);
@@ -135,7 +202,7 @@ class printDocument {
 
         return $header;
     }
-
+    
     function cut() {
         return chr(29) . chr(86) . chr(1);
     }
@@ -228,117 +295,117 @@ class InvoicePDF extends TCPDF {
         $this->Cell($width, $height, $textval, 0, false, $align);
     }
 
-    public function CreateInvoice($par_purchase = false, $par_write = FALSE) {
-        if (isset($_SESSION['selected_partner']) && $_SESSION['selected_partner'] > 0) {
-            $bt = new blueticket_objects();
+    function prepareHeader($par_DocumentNumber = "") {
+
+        $print = new printDocument();
+
+        $header = $print->prepareHeaderPdf($par_DocumentNumber);
+
+        $this->SetY(35);
+        $this->SetFont('freesans', 'B', 8);
+
+        $this->MultiCell(85, 20, nl2br($header), 0, 'L', 0, 1, '120', '', true, null, true);
+    }
+
+    public function CreateInvoice($par_DocumentNumber) {
+        //if (isset($_SESSION['selected_partner']) && $_SESSION['selected_partner'] > 0) {
+        $bt = new blueticket_objects();
 
 // create a PDF object
-            $pdf = new InvoicePDF(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
+        $pdf = new InvoicePDF(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
 
 // set document (meta) information
-            $pdf->SetCreator(PDF_CREATOR);
-            $pdf->SetAuthor('blueticket s.r.o.');
-            $pdf->SetTitle('blueticket document');
-            $pdf->SetSubject('Document');
-            $pdf->SetKeywords('PDF');
+        $pdf->SetCreator(PDF_CREATOR);
+        $pdf->SetAuthor('blueticket s.r.o.');
+        $pdf->SetTitle('blueticket document');
+        $pdf->SetSubject('Document');
+        $pdf->SetKeywords('PDF');
 
 // add a page
-            $pdf->AddPage();
-
-            $blueticket = blueticket_forms_db::get_instance();
-
-            $blueticket->query("SELECT * FROM partners WHERE ID='" . $_SESSION['selected_partner'] . "'");
-
-            $myrow = $blueticket->row();
-
-            $partner_id = $myrow['ID'];
-
-// create address box
-            $pdf->CreateTextBox($myrow['Name'], 0, 55, 80, 10, 10, 'B');
-            $pdf->CreateTextBox($myrow['Address'], 0, 60, 80, 10, 10);
-            $pdf->CreateTextBox($myrow['ZIP'] . ' ' . $myrow['City'], 0, 65, 80, 10, 10);
-            $pdf->CreateTextBox($myrow['State'], 0, 70, 80, 10, 10);
-
-// invoice title / number
-            if ($par_purchase == TRUE)
-                $pdf->CreateTextBox($bt->getTranslatedText('PurchaseCard') . ' #201012345', 0, 90, 120, 20, 16);
-            else
-                $pdf->CreateTextBox($bt->getTranslatedText('IssueCard') . ' #201012345', 0, 90, 120, 20, 16);
-
+        $pdf->AddPage();
+//
+        $blueticket = blueticket_forms_db::get_instance();
+//
+        $blueticket->query("SELECT * FROM invoices_items WHERE InvoiceNumber='$par_DocumentNumber'");
+        $myitems = $blueticket->result();
+//
+//        $myrow = $blueticket->row();
+//
+//        $partner_id = $myrow['ID'];
+//
+//// create address box
+//        $pdf->CreateTextBox($myrow['Name'], 0, 55, 80, 10, 10, 'B');
+//        $pdf->CreateTextBox($myrow['Address'], 0, 60, 80, 10, 10);
+//        $pdf->CreateTextBox($myrow['ZIP'] . ' ' . $myrow['City'], 0, 65, 80, 10, 10);
+//        $pdf->CreateTextBox($myrow['State'], 0, 70, 80, 10, 10);
+//
+//// invoice title / number
+//        if ($par_purchase == TRUE)
+//            $pdf->CreateTextBox($bt->getTranslatedText('PurchaseCard') . ' #201012345', 0, 90, 120, 20, 16);
+//        else
+//            $pdf->CreateTextBox($bt->getTranslatedText('IssueCard') . ' #201012345', 0, 90, 120, 20, 16);
 // date, order ref
-            $pdf->CreateTextBox($bt->getTranslatedText('Date') . ': ' . date('d-m-Y'), 0, 100, 0, 10, 10, '', 'R');
+        $pdf->prepareHeader($par_DocumentNumber);
+        //$pdf->CreateTextBox($bt->getTranslatedText('Date') . ': ' . date('d-m-Y'), 0, 100, 0, 10, 10, '', 'R');
 //$pdf->CreateTextBox('Order ref.: #6765765', 0, 105, 0, 10, 10, '', 'R');
 //items
 // list headers
-            $pdf->CreateTextBox($bt->getTranslatedText('Quantity'), 0, 120, 20, 10, 10, 'B', 'C');
-            $pdf->CreateTextBox($bt->getTranslatedText('Name'), 20, 120, 90, 10, 10, 'B');
-            $pdf->CreateTextBox($bt->getTranslatedText('Price'), 110, 120, 30, 10, 10, 'B', 'R');
-            $pdf->CreateTextBox($bt->getTranslatedText('Subtotal'), 140, 120, 30, 10, 10, 'B', 'R');
+        $pdf->CreateTextBox($bt->getTranslatedText('Quantity'), 0, 120, 20, 10, 10, 'B', 'C');
+        $pdf->CreateTextBox($bt->getTranslatedText('Name'), 20, 120, 90, 10, 10, 'B');
+        $pdf->CreateTextBox($bt->getTranslatedText('Price'), 110, 120, 30, 10, 10, 'B', 'R');
+        $pdf->CreateTextBox($bt->getTranslatedText('Subtotal'), 140, 120, 30, 10, 10, 'B', 'R');
 
-            $pdf->Line(20, 129, 195, 129);
+        $pdf->Line(20, 129, 195, 129);
 
-            $currY = 128;
-            $total = 0;
-            foreach ($_SESSION['selected_items'] as $row) {
-                if ($par_write) {
-                    $btdb = blueticket_forms_db::get_instance();
+        $currY = 128;
+        $total = 0;
+        foreach ($myitems as $row) {
+            $btdb = blueticket_forms_db::get_instance();
 
-                    if ($par_purchase)
-                        $price = $row['purchase_price'];
-                    else
-                        $price = $row['price'];
+            $price = $row['Price'];
 
-                    $btdb->query("SELECT * FROM items WHERE RegistrationNumber='" . $row['reg'] . "'");
-                    $myrow = $btdb->row();
-                    $tax = $myrow['TaxID'];
-                    $type = $myrow['TypeID'];
-                    $btdb->query("SELECT * FROM units WHERE ID='" . $myrow['UnitID'] . "'");
-                    $myrow = $btdb->row();
+            $btdb->query("SELECT * FROM items WHERE RegistrationNumber='" . $row['Barcode'] . "'");
+            $myrow = $btdb->row();
+            $tax = $myrow['TaxID'];
+            $type = $myrow['TypeID'];
+            $btdb->query("SELECT * FROM units WHERE ID='" . $myrow['UnitID'] . "'");
+            $myrow = $btdb->row();
 
-                    $unit = $myrow['Name'];
+            $unit = $myrow['Name'];
 
-                    $btdb->query("SELECT * FROM taxes WHERE ID='$tax'");
-                    $myrow = $btdb->row();
+            $btdb->query("SELECT * FROM taxes WHERE ID='$tax'");
+            $myrow = $btdb->row();
 
-                    $tax = $myrow['Value'];
+            $tax = $myrow['Value'];
 
-                    $btdb->query("INSERT INTO current_accounting(CartNr,RegistrationNumber,Name,Price,Unit,Tax,Qty,TypeID,Printed) VALUES('$partner_id','" . $row['reg'] . "', '" . $row['name'] . "',$price,'$unit',$tax, " . $row['qty'] . ", $type, 0)");
-                }
-                $pdf->CreateTextBox($row['qty'], 0, $currY, 20, 10, 10, '', 'C');
-                $pdf->CreateTextBox($row['reg'] . ' - ' . $row['name'], 20, $currY, 90, 10, 10, '');
-                if ($par_purchase) {
-                    $pdf->CreateTextBox(number_format($row['purchase_price'], 2, '.', ' ') . ' €', 110, $currY, 30, 10, 10, '', 'R');
-                    $amount = $row['qty'] * $row['purchase_price'];
-                } else {
-                    $pdf->CreateTextBox(number_format($row['price'], 2, '.', ' ') . ' €', 110, $currY, 30, 10, 10, '', 'R');
-                    $amount = $row['qty'] * $row['price'];
-                }
-                $pdf->CreateTextBox(number_format($amount, 2, '.', ' ') . ' €', 140, $currY, 30, 10, 10, '', 'R');
-                $currY = $currY + 5;
-                $total = $total + $amount;
-            }
-            $pdf->Line(20, $currY + 4, 195, $currY + 4);
+            //$btdb->query("INSERT INTO current_accounting(CartNr,RegistrationNumber,Name,Price,Unit,Tax,Qty,TypeID,Printed) VALUES('$partner_id','" . $row['reg'] . "', '" . $row['name'] . "',$price,'$unit',$tax, " . $row['qty'] . ", $type, 0)");
+            $pdf->CreateTextBox($row['Quantity'], 0, $currY, 20, 10, 10, '', 'C');
+            $pdf->CreateTextBox($row['Barcode'] . ' - ' . $row['Name'], 20, $currY, 90, 10, 10, '');
+            $pdf->CreateTextBox(number_format($row['Price'], 2, '.', ' ') . ' €', 110, $currY, 30, 10, 10, '', 'R');
+            $amount = $row['Quantity'] * $row['Price'];
+            $pdf->CreateTextBox(number_format($amount, 2, '.', ' ') . ' €', 140, $currY, 30, 10, 10, '', 'R');
+            $currY = $currY + 5;
+            $total = $total + $amount;
+        }
+        $pdf->Line(20, $currY + 4, 195, $currY + 4);
 
 //footer
 //
 // output the total row
-            $pdf->CreateTextBox($bt->getTranslatedText('Total'), 5, $currY + 5, 135, 10, 10, 'B', 'R');
-            $pdf->CreateTextBox(number_format($total, 2, '.', ' ') . ' €', 140, $currY + 5, 30, 10, 10, 'B', 'R');
+        $pdf->CreateTextBox($bt->getTranslatedText('Total'), 5, $currY + 5, 135, 10, 10, 'B', 'R');
+        $pdf->CreateTextBox(number_format($total, 2, '.', ' ') . ' €', 140, $currY + 5, 30, 10, 10, 'B', 'R');
 
 // some payment instructions or information
-            $pdf->setXY(20, $currY + 30);
-            $pdf->SetFont('freesans', '', 10);
-            $pdf->MultiCell(175, 10, $bt->getTranslatedText('InvoiceFooter'), 0, 'L', 0, 1, '', '', true, null, true);
+        $pdf->setXY(20, $currY + 30);
+        $pdf->SetFont('freesans', '', 10);
+        $pdf->MultiCell(175, 10, $bt->getTranslatedText('InvoiceFooter'), 0, 'L', 0, 1, '', '', true, null, true);
 
 //Close and output PDF document
-            $pdf->Output('invoice.pdf', 'D');
+        $pdf->Output('doc_' . $par_DocumentNumber . '.pdf', 'D');
 
-            if ($par_write) {
-                $bt->unset_all();
-            }
-        } else {
-            header('location: index.php?report=partners');
-        }
+//        } else {
+//            header('location: index.php?report=partners');
+//        }
     }
 
 }
@@ -784,7 +851,7 @@ $("#dialog").dialog("close");
         $blueticket->order_by('Name', 'ASC');
         $blueticket->table_name($this->getTranslatedText('Items')); //titulok zobrazenia tabulky na stranke
 
-        $blueticket->columns('PLU,RegistrationNumber,Name,Qty,UnitID,Price,GroupID,SubtotalPrice,SubtotalPurchasePrice'); //nastavenie stlpcov tabulky, ktore sa zobrazia v tabulkovom zobrazeni
+        $blueticket->columns('Barcode,PLU,RegistrationNumber,Name,Qty,UnitID,Price,GroupID,SubtotalPrice,SubtotalPurchasePrice'); //nastavenie stlpcov tabulky, ktore sa zobrazia v tabulkovom zobrazeni
         $blueticket->fields('Barcode,PLU,Name,Qty,UnitID,Price,MinimalPrice,PurchasePrice,TaxID,GroupID,TypeID'); //nastavenie stlpcov tabulky, ktore sa zobrazia v tabulkovom zobrazeni
 
         $blueticket->label('PLU', $this->getTranslatedText('PLU'));
@@ -994,7 +1061,7 @@ $("#dialog").dialog("close");
         $blueticket_units->columns('Name'); //nastavenie stlpcov tabulky, ktore sa zobrazia v tabulkovom zobrazeni
         $blueticket_units->fields('Name'); //nastavenie stlpcov tabulky, ktore sa zobrazia v tabulkovom zobrazeni
         $blueticket_units->label('Name', $this->getTranslatedText('Name'));
-        
+
         return $blueticket_units->render();
     }
 
@@ -1005,9 +1072,14 @@ $("#dialog").dialog("close");
                     url: "printdoc.php?document=" + par_documentno,
                 }).done(function () {
                 alert("Doklad " + par_documentno + " bol odoslany do tlaciarne");
-});
-}
-</script>';
+                });
+            }
+            function print_doc_pdf(par_documentno) {
+                var url = "printdocpdf.php?document=" + par_documentno;
+                window.open(url);
+                //jQuery.fileDownload(url);
+            }
+            </script>';
         $blueticket_types = blueticket_forms::get_instance();
 
         $blueticket_types->table('document_types');
@@ -1026,7 +1098,7 @@ $("#dialog").dialog("close");
 //        $blueticket->table_name($this->getTranslatedText('Invoices'));
         $blueticket->default_tab($this->getTranslatedText('Invoices'));
 
-        $blueticket->columns('Partner, InvoiceDateTime, InvoiceNumber, UserName, InvoiceTotal'); //nastavenie stlpcov tabulky, ktore sa zobrazia v tabulkovom zobrazeni
+        $blueticket->columns('Partner, InvoiceDateTime, InvoiceNumber, UserName, InvoiceTotal, URL'); //nastavenie stlpcov tabulky, ktore sa zobrazia v tabulkovom zobrazeni
         $blueticket->fields('Partner, TypeID, CustomerID, CustomerDescription, InvoiceDateTime, PaymentTypeID, DeliveryTypeID'); //nastavenie stlpcov tabulky, ktore sa zobrazia v tabulkovom zobrazeni
         $blueticket->label('TypeID', $this->getTranslatedText('TypeID'));
         $blueticket->label('InvoiceDateTime', $this->getTranslatedText('InvoiceDateTime'));
@@ -1045,10 +1117,11 @@ $("#dialog").dialog("close");
         $blueticket->relation('DeliveryTypeID', 'delivery_types', 'ID', 'Description');
 
         $blueticket->button("javascript:print_doc('{InvoiceNumber}');", $this->getTranslatedText('Print'), 'glyphicon glyphicon-print');
+        $blueticket->button("javascript:print_doc_pdf('{InvoiceNumber}');", $this->getTranslatedText('Print'), 'glyphicon glyphicon-print');
 
         $blueticket->subselect('UserName', 'SELECT Username FROM users WHERE ID={UserID}');
         $blueticket->subselect('Partner', "SELECT Name FROM partners WHERE partners.ID={CustomerID}");
-
+        $blueticket->subselect('URL', "SELECT 'http://localhost/blueticket.forms/printdocpdf.php?document={InvoiceNumber}'");
         $blueticket->subselect('InvoiceTotal', 'SELECT SUM(Price*Quantity) as InvoiceTotal FROM invoices_items WHERE InvoiceNumber={InvoiceNumber}');
 //$blueticket->subselect('InvoiceTotalToday', 'SELECT SUM(Price*Quantity) as InvoiceTotal FROM invoices_items WHERE InvoiceNumber={InvoiceNumber}');
         $blueticket->order_by('InvoiceDateTime', 'DESC');
@@ -1284,8 +1357,9 @@ $("#dialog").dialog("close");
         $bt_item_invoice_month->change_type('Quantity,Price,SubTotal', 'price', '0');
 
         $bt_item_invoice_month->sum('SubTotal');
-        
-        
+
+
         return $blueticket_u->render();
     }
+
 }

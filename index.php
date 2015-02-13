@@ -25,22 +25,22 @@ if (isset($_GET['report'])) {
         case 'print_items_qr':
             echo $bt->printItems('QR');
             break;
-        case 'print_purchase':
-            $inv = new InvoicePDF();
-            echo $inv->CreateInvoice(TRUE);
-            break;
-        case 'print_shipment':
-            $inv = new InvoicePDF();
-            echo $inv->CreateInvoice();
-            break;
-        case 'print_shipment_cash':
-            $inv = new InvoicePDF();
-            echo $inv->CreateInvoice(FALSE, TRUE);
-            break;
-        case 'print_purchase_cash':
-            $inv = new InvoicePDF();
-            echo $inv->CreateInvoice(TRUE, TRUE);
-            break;
+//        case 'print_purchase':
+//            $inv = new InvoicePDF();
+//            echo $inv->CreateInvoice(TRUE);
+//            break;
+//        case 'print_shipment':
+//            $inv = new InvoicePDF();
+//            echo $inv->CreateInvoice();
+//            break;
+//        case 'print_shipment_cash':
+//            $inv = new InvoicePDF();
+//            echo $inv->CreateInvoice(FALSE, TRUE);
+//            break;
+//        case 'print_purchase_cash':
+//            $inv = new InvoicePDF();
+//            echo $inv->CreateInvoice(TRUE, TRUE);
+//            break;
     }
 }
 ?>
@@ -51,7 +51,7 @@ if (isset($_GET['report'])) {
         <script src="forms/plugins/jquery.min.js"></script>
         <link href="forms/plugins/jquery-ui/jquery-ui.min.css" rel="stylesheet">
         <script src="forms/plugins/jquery-ui/jquery-ui.min.js"></script>
-
+        <script src="filedownload/jquery.fileDownload.js"></script>
         <script type="text/javascript">
         </script>
 
