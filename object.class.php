@@ -6,10 +6,10 @@
  * and open the template in the editor.
  */
 
-use PFBC\Form;
-use PFBC\Element;
+//use PFBC\Form;
+//use PFBC\Element;
 
-require_once("pfbc/PFBC/Form.php");
+//require_once("pfbc/PFBC/Form.php");
 require_once("forms/blueticket_forms.php");
 
 require_once ('tcpdf/tcpdf.php');
@@ -471,10 +471,10 @@ class blueticket_objects {
     }
 
     public function generateMainScreen() {
-        $form = new Form("form-main");
-        $button = new Element\Button("Číselníky");
-        $form->addElement($button);
-        $form->render();
+//        $form = new Form("form-main");
+//        $button = new Element\Button("Číselníky");
+//        $form->addElement($button);
+//        $form->render();
     }
 
     public function generateDesks() {
@@ -580,7 +580,7 @@ class blueticket_objects {
         $bt_items->label('Barcode', $this->getTranslatedText('Barcode'));
         $bt_items->label('TypeID', $this->getTranslatedText('TypeID'));
 
-        $bt_items->column_pattern('Barcode', '<img style="width:90px; height:90px" src="inc/qrcode.php?code={RegistrationNumber}"/>');
+//        $bt_items->column_pattern('Barcode', '<img style="width:90px; height:90px" src="inc/qrcode.php?code={RegistrationNumber}"/>');
 
         $bt_items->relation('UnitID', 'units', 'ID', 'Name');
         $bt_items->relation('TaxID', 'taxes', 'ID', 'Value');
@@ -867,7 +867,7 @@ $("#dialog").dialog("close");
         $blueticket->label('Barcode', $this->getTranslatedText('Barcode'));
         $blueticket->label('TypeID', $this->getTranslatedText('TypeID'));
 
-        $blueticket->column_pattern('Barcode', '<img style="width:90px; height:90px" src="inc/qrcode.php?code={RegistrationNumber}"/>');
+//        $blueticket->column_pattern('Barcode', '<img style="width:90px; height:90px" src="inc/qrcode.php?code={RegistrationNumber}"/>');
 
         $blueticket->relation('UnitID', 'units', 'ID', 'Name');
         $blueticket->relation('TaxID', 'taxes', 'ID', 'Value');

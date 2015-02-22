@@ -1990,10 +1990,8 @@ class blueticket_forms {
         exit();
     }
 
-    public function _csv()
-    {
-        if (!$this->is_csv)
-        {
+    public function _csv() {
+        if (!$this->is_csv) {
             return self::error('Restricted');
         }
         $db = blueticket_forms_db::get_instance($this->connection);
@@ -2003,10 +2001,9 @@ class blueticket_forms {
         $order_by = $this->_build_order_by();
         $this->_set_column_names();
         $headers = array();
-        foreach ($this->columns as $field => $fitem)
-        {
+        foreach ($this->columns as $field => $fitem) {
             if (isset($this->field_type[$field]) && ($this->field_type[$field] == 'password' or $this->field_type[$field] ==
-                'hidden'))
+                    'hidden'))
                 continue;
             $headers[] = $this->columns_names[$field];
         }
@@ -2017,28 +2014,24 @@ class blueticket_forms {
         header("Cache-Control: public");
         header("Content-type: application/octet-stream");
         header("Content-Disposition: attachment; filename=\"" . $this->_clean_file_name($this->table_name ? $this->table_name :
-            $this->table) . ".csv\"");
+                                $this->table) . ".csv\"");
         header("Content-Transfer-Encoding: binary");
         $output = fopen('php://output', 'w');
         fwrite($output, chr(0xEF) . chr(0xBB) . chr(0xBF)); // bom
         fputcsv($output, $headers, blueticket_forms_config::$csv_delimiter, blueticket_forms_config::$csv_enclosure);
         $db->query("SELECT {$select} FROM `{$this->table}` {$table_join} {$where} {$order_by}");
-        while ($row = $db->result->fetch_assoc()) // low level result process, saves memory
-        {
+        while ($row = $db->result->fetch_assoc()) { // low level result process, saves memory
             $out = array();
-            foreach ($this->columns as $field => $fitem)
-            {
+            foreach ($this->columns as $field => $fitem) {
                 if (isset($this->field_type[$field]) && ($this->field_type[$field] == 'password' or $this->field_type[$field] ==
-                    'hidden'))
+                        'hidden'))
                     continue;
-                $out[] = htmlspecialchars_decode(strip_tags($this->_render_export_item($field, $row[$field], $row['primary_key'], $row)),
-                    ENT_QUOTES);
+                $out[] = htmlspecialchars_decode(strip_tags($this->_render_export_item($field, $row[$field], $row['primary_key'], $row)), ENT_QUOTES);
             }
             fputcsv($output, $out, blueticket_forms_config::$csv_delimiter, blueticket_forms_config::$csv_enclosure);
         }
     }
-    
-    
+
     public function _xls() {
         require_once dirname(__FILE__) . '/plugins/excel/Classes/PHPExcel.php';
 
@@ -3533,13 +3526,21 @@ class blueticket_forms {
                 }
                 // search in subselect
                 elseif (isset($this->subselect[$this->column])) {
-                    $where_arr[] = '(' . $this->subselect_query[$this->column] . ') LIKE ' . $db->escape_like($this->phrase, $this->
-                                    search_pattern);
+                    if (substr($db->escape_like($this->phrase, $this->search_pattern), 0, 7) == 'RLIKE "')
+                        $where_arr[] = '(' . $this->subselect_query[$this->column] . ') ' . $db->escape_like($this->phrase, $this->
+                                        search_pattern);
+                    else
+                        $where_arr[] = '(' . $this->subselect_query[$this->column] . ') LIKE ' . $db->escape_like($this->phrase, $this->
+                                        search_pattern);
                 } elseif (isset($this->point_field[$this->column])) {
                     $fdata = $this->_parse_field_names($this->column, 'build_where');
                     $fitem = reset($fdata);
-                    $where_arr[] = 'CONCAT(X(`' . $fitem['table'] . '`.`' . $fitem['field'] . '`),\',\',Y(`' . $fitem['table'] . '`.`' . $fitem['field'] .
-                            '`))LIKE ' . $db->escape_like($this->phrase, $this->search_pattern);
+                    if (substr($db->escape_like($this->phrase, $this->search_pattern), 0, 7) == 'RLIKE "')
+                        $where_arr[] = 'CONCAT(X(`' . $fitem['table'] . '`.`' . $fitem['field'] . '`),\',\',Y(`' . $fitem['table'] . '`.`' . $fitem['field'] .
+                                '`)) ' . $db->escape_like($this->phrase, $this->search_pattern);
+                    else
+                        $where_arr[] = 'CONCAT(X(`' . $fitem['table'] . '`.`' . $fitem['field'] . '`),\',\',Y(`' . $fitem['table'] . '`.`' . $fitem['field'] .
+                                '`))LIKE ' . $db->escape_like($this->phrase, $this->search_pattern);
                 } else {
                     $fdata = $this->_parse_field_names($this->column, 'build_where');
                     $fitem = reset($fdata);
@@ -3583,8 +3584,12 @@ class blueticket_forms {
                             $where_arr[] = '(`' . $fitem['table'] . '`.`' . $fitem['field'] . '` = ' . ((int) $this->phrase) . ')';
                             break;
                         default:
-                            $where_arr[] = '(`' . $fitem['table'] . '`.`' . $fitem['field'] . '` LIKE ' . $db->escape_like($this->phrase, $this->
-                                            search_pattern) . ')';
+                            if (substr($db->escape_like($this->phrase, $this->search_pattern), 0, 7) == 'RLIKE "')
+                                $where_arr[] = '(`' . $fitem['table'] . '`.`' . $fitem['field'] . '` ' . $db->escape_like($this->phrase, $this->
+                                                search_pattern) . ')';
+                            else
+                                $where_arr[] = '(`' . $fitem['table'] . '`.`' . $fitem['field'] . '` LIKE ' . $db->escape_like($this->phrase, $this->
+                                                search_pattern) . ')';
                             break;
                     }
                 }
@@ -3598,11 +3603,18 @@ class blueticket_forms {
                     } elseif (isset($this->fk_relation[$key])) {
                         $or_array[] = $this->_build_fk_relation_subwhere($key);
                     } elseif (isset($this->subselect[$key])) {
-                        $or_array[] = '(' . $this->subselect_query[$key] . ') LIKE ' . $db->escape_like($this->phrase, $this->search_pattern);
+                        if (substr($db->escape_like($this->phrase, $this->search_pattern), 0, 7) == 'RLIKE "')
+                            $or_array[] = '(' . $this->subselect_query[$key] . ') ' . $db->escape_like($this->phrase, $this->search_pattern);
+                        else
+                            $or_array[] = '(' . $this->subselect_query[$key] . ') LIKE ' . $db->escape_like($this->phrase, $this->search_pattern);
                     } else {
                         //$f_array[] = '`' . $fitem['table'] . '`.`' . $fitem['field'] . '`';
-                        $or_array[] = '`' . $fitem['table'] . '`.`' . $fitem['field'] . '` LIKE ' . $db->escape_like($this->phrase, $this->
-                                        search_pattern);
+                        if (substr($db->escape_like($this->phrase, $this->search_pattern), 0, 7) == 'RLIKE "')
+                            $or_array[] = '`' . $fitem['table'] . '`.`' . $fitem['field'] . '` ' . $db->escape_like($this->phrase, $this->
+                                            search_pattern);
+                        else
+                            $or_array[] = '`' . $fitem['table'] . '`.`' . $fitem['field'] . '` LIKE ' . $db->escape_like($this->phrase, $this->
+                                            search_pattern);
                     }
                 }
                 $where = '(';
@@ -3666,7 +3678,10 @@ class blueticket_forms {
                             WHERE `{$rel['rel_alias']}`.`{$rel['rel_field']}` = `{$rel['table']}`.`{$rel['field']}` 
                             LIMIT 1) \r\n";
             }
-            return "{$select} LIKE " . $db->escape_like($this->phrase, $this->search_pattern);
+            if (substr($db->escape_like($this->phrase, $this->search_pattern), 0, 7) == 'RLIKE "')
+                return "{$select} " . $db->escape_like($this->phrase, $this->search_pattern);
+            else
+                return "{$select} LIKE " . $db->escape_like($this->phrase, $this->search_pattern);
         }
         /*
           else
@@ -3736,6 +3751,9 @@ class blueticket_forms {
             INNER JOIN `' . $fk['fk_table'] . '` ON `' . $fk['fk_table'] . '`.`' . $fk['out_fk_field'] . '` = `' . $fk['rel_tbl'] .
                 '`.`' . $fk['rel_field'] . '` WHERE `' . $fk['fk_table'] . '`.`' . $fk['in_fk_field'] . '` = `' . $fk['table'] . '`.`' .
                 $fk['field'] . '` AND ' . $this->_build_rel_where($key) . ')' . "\r\n";
+            if (substr($db->escape_like($this->phrase, $this->search_pattern), 0, 7) == 'RLIKE "')
+        return $select . ' ' . $db->escape_like($this->phrase, $this->search_pattern);
+            else
         return $select . ' LIKE ' . $db->escape_like($this->phrase, $this->search_pattern);
     }
 
