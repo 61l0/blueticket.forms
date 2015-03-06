@@ -88,7 +88,7 @@ class blueticket_forms {
     protected $remove_confirm = false;
     protected $upload_folder = array();
     protected $upload_config = array();
-    protected $upload_folder_def = '../uploads';
+    protected $upload_folder_def = '../../uploads';
     protected $upload_to_save = array();
     protected $upload_to_remove = array();
     protected $binary = array();

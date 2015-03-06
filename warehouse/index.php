@@ -47,11 +47,11 @@ if (isset($_GET['report'])) {
 <html>
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-        <link rel="stylesheet" type="text/css" href="forms/themes/bootstrap/blueticket_forms.css">        
-        <script src="forms/plugins/jquery.min.js"></script>
-        <link href="forms/plugins/jquery-ui/jquery-ui.min.css" rel="stylesheet">
-        <script src="forms/plugins/jquery-ui/jquery-ui.min.js"></script>
-        <script src="filedownload/jquery.fileDownload.js"></script>
+        <link rel="stylesheet" type="text/css" href="../lib/forms/themes/bootstrap/blueticket_forms.css">        
+        <script src="../lib/forms/plugins/jquery.min.js"></script>
+        <link href="../lib/forms/plugins/jquery-ui/jquery-ui.min.css" rel="stylesheet">
+        <script src="../lib/forms/plugins/jquery-ui/jquery-ui.min.js"></script>
+        <script src="../lib/filedownload/jquery.fileDownload.js"></script>
         <script type="text/javascript">
         </script>
 

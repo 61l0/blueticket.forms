@@ -10,12 +10,12 @@
 //use PFBC\Element;
 
 //require_once("pfbc/PFBC/Form.php");
-require_once("forms/blueticket_forms.php");
+require_once("../lib/forms/blueticket_forms.php");
 
-require_once ('tcpdf/tcpdf.php');
-require_once ('tcpdf/tcpdf_barcodes_2d.php');
+require_once ('../lib/tcpdf/tcpdf.php');
+require_once ('../lib/tcpdf/tcpdf_barcodes_2d.php');
 
-require_once 'php_socket.class.php';
+require_once '../lib/sockets/php_socket.class.php';
 
 class printDocument {
 
