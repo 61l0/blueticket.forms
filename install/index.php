@@ -1,7 +1,12 @@
+<?php
+require_once '../warehouse/object.class.php';
+$bt = blueticket_forms::get_instance();
+?>
+
 <!DOCTYPE html>
 <html lang="en">
     <head>
-        <title>blueticket.forms</title>
+        <title>blueticket&#8482;.forms</title>
         <meta charset="utf-8">
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
         <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -9,11 +14,11 @@
         <meta name="description" content="">
         <meta name="author" content="">
         <!-- Bootstrap core CSS -->
-        <link href="../lib/forms/plugins/bootstrap/css/bootstrap.min.css" rel="stylesheet">
-        <!-- Bootstrap theme -->
+<!--        <link href="../lib/forms/plugins/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+         Bootstrap theme 
         <link href="../lib/forms/plugins/bootstrap/css/bootstrap-theme.min.css" rel="stylesheet">
         <script type="text/javascript" src="../lib/forms/plugins/jquery.min.js"></script>
-        <script type="text/javascript" src="../lib/forms/plugins/bootstrap/js/bootstrap.min.js"></script>
+        <script type="text/javascript" src="../lib/forms/plugins/bootstrap/js/bootstrap.min.js"></script>-->
         <!-- Glyphicons -->
         <link rel="stylesheet" href="../lib/forms/plugins/bootstrap/fonts/glyphicons/font-awesome/css/font-awesome.min.css">
         <style>
@@ -162,87 +167,112 @@
                 color:white;
                 background-color: #BD221C;
             }   
-
-
         </style>
     </head>
 
-    <body role="document" style="background: url('../images/background.jpg') no-repeat center center">
+    <body role="document" style="background: url('../images/background.jpg') no-repeat center center; background-size: cover">
+
+        <nav class="navbar navbar-inverse"> <!--  /*navbar-fixed-top*/ -->
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <a class="navbar-brand" href="index.php"><span class="logo">blueticket&#8482;.forms</span></a>
+            </div>
+            <div id="navbar" class="collapse navbar-collapse">
+                <ul class="nav navbar-nav">
+                    <li>
+                        <a href="#" id="menu1" data-toggle="dropdown">Home&nbsp;<span class="caret"></span></a>
+                        <ul class="dropdown-menu" role="menu" aria-labelledby="menu1">
+                            <li>
+                                <a href="#" id="menu4" data-toggle="dropdown">Home</a>
+                            </li>
+                            <li>
+                                <a href="#" id="menu5" data-toggle="dropdown">Home</a>
+                            </li>
+                            <li>
+                                <a href="#" id="menu4" data-toggle="dropdown">Home</a>
+                            </li>
+                            <li>
+                                <a href="#" id="menu5" data-toggle="dropdown">Home</a>
+                            </li>
+                            <li>
+                                <a href="#" id="menu4" data-toggle="dropdown">Home</a>
+                            </li>
+                            <li>
+                                <a href="#" id="menu5" data-toggle="dropdown">Home</a>
+                            </li>
+                        </ul>
+                    </li>
+                    <li><a href="#about">About</a></li>
+                    <li><a href="#contact">Contact</a></li>
+                </ul>
+            </div><!--/.nav-collapse -->
+        </nav>
 
         <div class="container-fluid content col-lg-12">
-            <div class="row">
-                <div class="col-md-12" style="padding-top: 10px">
-                    <div class="panel">
-                        <div class="panel-body panel-collapse">
-                            <nav class="collapse navbar-collapse" role="navigation" id="topmenu">
-                                <ul class="nav navbar-nav">
-                                    <li class="btn-toolbar">
-                                        <span class="logo">blueticket&#8482;&nbsp;</span>
-                                    </li>
-                                    <li class="btn-toolbar">
-                                        <a href="#" data-toggle="collapse" data-target="#one">One</a>
-                                    </li>
-                                    <li class="btn-toolbar">
-                                        <a href="#" data-toggle="collapse" data-target="#two">Two</a>
-                                    </li>
-                                    <li class="btn-toolbar">
-                                        <a href="#" data-toggle="collapse" data-target="#three">Three</a>
-                                    </li>
-                                </ul>
-                            </nav>
-                            <button type="button" class="navbar-toggle collapsed toogle-margin-zero" data-toggle="collapse" data-target="#topmenu">
-                                <i class="fa fa-bars"></i>
-                            </button>
-                        </div>
+            <div class="col-md-12">
+                <div class="panel panel-default transparent_white shadow">
+                    <div class="panel-body">
+                        <?php
+//$bt = new blueticket_forms();
+
+                        $bt->table('blueticket_forms_fields');
+                        $bt->change_type('List', 'checkboxes', '1', array(1 => 'Ano', 0 => 'Nie'));
+                        echo $bt->render();
+                        ?>
                     </div>
                 </div>
             </div>
-            <div class="row">
-                <div class="col-md-8">
-                    <div class="panel panel-default transparent_white shadow">
-                        <div class="panel-body">
-                            <p class="logo">Why use blueticket.forms?</p>
-                            <dl>
-                                <dt>Extremely fast development</dt>
-                                <dd>You can create your own application without best knowledge of PHP. You need only to know, what you realy want.</dd>
-                                <dt>Reuseable code</dt>
-                                <dd>If you need some piece of code, you can use it as many times as you want</dd>
-                                <dt>Responsive design</dt>
-                                <dd>All of your applications, will be usable through spectrum of any devices, such as phones, tablets or PC's</dd>
-                                <dt>Fast engine</dt>
-                                <dd>blueticket.forms is designed to work fast with thousands of records per table</dd>
-                                <dt>Interconnection</dt>
-                                <dd>All of the applications objects wrote in the blueticket.forms can be interconnected together.</dd>
-                            </dl>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="panel panel-default transparent_white shadow">
-                        <div class="panel-body">
-                            <!-- DOGFORSHOW Sign up form -->
-                            <form id="frmSignIn" autocomplete="off">
-                                <div class="form-group">
-                                    <span class="logo">Please enter database connection settings</span>
+            <!--            <div class="row">
+                            <div class="col-md-8">
+                                <div class="panel panel-default transparent_white shadow">
+                                    <div class="panel-body">
+                                        <p class="logo">Why use blueticket.forms?</p>
+                                        <dl>
+                                            <dt>Extremely fast development</dt>
+                                            <dd>You can create your own application without best knowledge of PHP. You need only to know, what you realy want.</dd>
+                                            <dt>Reuseable code</dt>
+                                            <dd>If you need some piece of code, you can use it as many times as you want</dd>
+                                            <dt>Responsive design</dt>
+                                            <dd>All of your applications, will be usable through spectrum of any devices, such as phones, tablets or PC's</dd>
+                                            <dt>Fast engine</dt>
+                                            <dd>blueticket.forms is designed to work fast with thousands of records per table</dd>
+                                            <dt>Interconnection</dt>
+                                            <dd>All of the applications objects wrote in the blueticket.forms can be interconnected together.</dd>
+                                        </dl>
+                                    </div>
                                 </div>
-                                <div class="form-group">
-                                    <input type="text" autocomplete="off" class="form-control" id="txtHost" placeholder="Database host">
+                            </div>
+                            <div class="col-md-4">
+                                <div class="panel panel-default transparent_white shadow">
+                                    <div class="panel-body">
+                                         DOGFORSHOW Sign up form 
+                                        <form id="frmSignIn" autocomplete="off">
+                                            <div class="form-group">
+                                                <span class="logo">Please enter database connection settings</span>
+                                            </div>
+                                            <div class="form-group">
+                                                <input type="text" autocomplete="off" class="form-control" id="txtHost" placeholder="Database host">
+                                            </div>
+                                            <div class="form-group">
+                                                <input type="text" autocomplete="off" class="form-control" id="txtName" placeholder="Database name">
+                                            </div>
+                                            <div class="form-group">
+                                                <input type="text" autocomplete="off" class="form-control" id="txtUser" placeholder="Database username">
+                                            </div>
+                                            <div class="form-group">
+                                                <input type="password" autocomplete="off" class="form-control" id="txtPassword" placeholder="Database password">
+                                            </div>
+                                        </form>
+                                        <button type="submit" class="btn btn-danger btn-lg btn-block"><span class="glyphicon glyphicon-log-in" aria-hidden="true"></span> Save settings</button>
+                                    </div>
                                 </div>
-                                <div class="form-group">
-                                    <input type="text" autocomplete="off" class="form-control" id="txtName" placeholder="Database name">
-                                </div>
-                                <div class="form-group">
-                                    <input type="text" autocomplete="off" class="form-control" id="txtUser" placeholder="Database username">
-                                </div>
-                                <div class="form-group">
-                                    <input type="password" autocomplete="off" class="form-control" id="txtPassword" placeholder="Database password">
-                                </div>
-                            </form>
-                            <button type="submit" class="btn btn-danger btn-lg btn-block"><span class="glyphicon glyphicon-log-in" aria-hidden="true"></span> Save settings</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
+                            </div>
+                        </div>-->
         </div>
     </body>
 </html>
