@@ -8,7 +8,6 @@
 
 //use PFBC\Form;
 //use PFBC\Element;
-
 //require_once("pfbc/PFBC/Form.php");
 require_once("../lib/forms/blueticket_forms.php");
 
@@ -63,8 +62,8 @@ class printDocument {
         $myString = "\n" . $parLeftStr . $tempSpace . $parRightStr;
 
         return $myString;
-    }    
-    
+    }
+
     function prepareHighLine($parLeftStr, $parRightStr, $parLength = 48) {
         $parLeftStr = $this->getSeo($parLeftStr);
         $parRightStr = $this->getSeo($parRightStr);
@@ -133,7 +132,7 @@ class printDocument {
         return $header;
     }
 
-        function prepareHeader($par_DocumentNumber = "") {
+    function prepareHeader($par_DocumentNumber = "") {
 
         $header = "\n"; //chr(27) . chr(116) . chr(18);
 //for($i=0;$i<255;$i++)
@@ -202,7 +201,7 @@ class printDocument {
 
         return $header;
     }
-    
+
     function cut() {
         return chr(29) . chr(86) . chr(1);
     }
@@ -847,6 +846,8 @@ $("#dialog").dialog("close");
 
         echo '<a href="?report=print_items_bc" class="btn btn-primary" style="width:150px; height:30px; margin-top:10px; margin-left:10px">' . $this->getTranslatedText('Tlač štítkov UPC') . '</a>';
         echo '<a href="?report=print_items_qr" class="btn btn-primary" style="width:150px; height:30px; margin-top:10px; margin-left:10px">' . $this->getTranslatedText('Tlač štítkov QR') . '</a>';
+        echo '<a href="?report=cards" class="btn btn-primary" style="width:150px; height:30px; margin-top:10px; margin-left:10px">' . $this->getTranslatedText('Všetky') . '</a>';
+        echo '<a href="?report=cards' . '&' . 'null=1" class="btn btn-primary" style="width:150px; height:30px; margin-top:10px; margin-left:10px">' . $this->getTranslatedText('Nenulové') . '</a>';
 //        echo '<a href="?report=print_shipment" class="btn btn-primary" style="width:150px; height:30px; margin-top:10px; margin-left:10px">' . $this->getTranslatedText('Tlač výdajky') . '</a>';
 //        echo '<a href="?report=print_purchase" class="btn btn-primary" style="width:150px; height:30px; margin-top:10px; margin-left:10px">' . $this->getTranslatedText('Tlač príjemky') . '</a>';
 //        echo '<a href="?report=print_shipment_cash" class="btn btn-primary" style="width:150px; height:30px; margin-top:10px; margin-left:10px">' . $this->getTranslatedText('Tlač výdajky + kasa') . '</a>';
@@ -854,6 +855,10 @@ $("#dialog").dialog("close");
         echo '<a href="?report=unset_all" class="btn btn-primary" style="width:150px; height:30px; margin-top:10px; margin-left:10px">' . $this->getTranslatedText('Vyčistit') . '</a>';
 
         $blueticket->table('items'); //nazov tabulky v databaze
+
+        if (isset($_REQUEST['null']) && $_REQUEST['null'] == 1)
+            $blueticket->where("Qty<>", "0");
+
         $blueticket->order_by('Name', 'ASC');
         $blueticket->table_name($this->getTranslatedText('Items')); //titulok zobrazenia tabulky na stranke
 

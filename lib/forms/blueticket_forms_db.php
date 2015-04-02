@@ -155,23 +155,24 @@ class blueticket_forms_db {
             $val = $mystr;
         }
 
+//        if (preg_match_all("/[<>!=]/", $val) > 0) {
+//            $pattern[0] = $val[0];
+//            $val = substr($val, 1, strlen($val) - 1);
+//        }
 
         if (is_int($val))
             $return = '\'' . $pattern[0] . (int) $val . $pattern[1] . '\'';
         if ($val == '') {
             $return = '\'\'';
         } else {
-            if (substr($val, 0, 7) == 'RLIKE "')
-            {
-                $return = (string) $val;// : $this->connect->real_escape_string((string) $val));
-            }
-            else
-            {
+            if (substr($val, 0, 7) == 'RLIKE "') {
+                $return = (string) $val; // : $this->connect->real_escape_string((string) $val));
+            } else {
                 $return = '\'' . $pattern[0] . ($this->magic_quotes ? (string) $val : $this->connect->real_escape_string((string) $val)) .
                         $pattern[1] . '\'';
             }
         }
-        
+
         return $return;
     }
 
